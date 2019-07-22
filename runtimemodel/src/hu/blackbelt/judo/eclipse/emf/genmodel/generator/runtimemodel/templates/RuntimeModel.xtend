@@ -67,6 +67,7 @@ class RuntimeModel implements IGenerator {
 		        «modelName»Model «modelName.decapitalize»Model = b.build();
 		        Resource resource = «modelName.decapitalize»Model.getResourceSet().createResource(loadArguments.uri);
 		        resource.load(loadArguments.loadOptions);
+		        «modelName»ModelResourceSupport.setupRelativeUriRoot(«modelName.decapitalize»Model.getResourceSet(), loadArguments.uri);
 		        return «modelName.decapitalize»Model;
 		    }
 		
