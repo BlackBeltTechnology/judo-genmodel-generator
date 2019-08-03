@@ -45,6 +45,14 @@ class RuntimeModel implements IGenerator {
 		import java.util.function.Predicate;
 		import java.util.stream.Collectors;
 		
+		// Import for EClipse URI fix hack
+		import org.eclipse.emf.common.util.DelegatingResourceLocator;
+		import org.eclipse.emf.ecore.plugin.EcorePlugin;
+		
+		import java.lang.reflect.Field;
+		import java.net.URL;
+		
+		
 		/**
 		 * A wrapper class on a «modelName» metamodel based model. This wrapper organizing the model a structure which can be used
 		 * in Tatami as a logical model.
@@ -219,6 +227,9 @@ class RuntimeModel implements IGenerator {
 		    }
 		
 		    private Diagnostic getDiagnostic(EObject eObject) {
+		    	
+		    	// Call the hack
+		    	fixEcoreUri();
 		        BasicDiagnostic diagnostics = new BasicDiagnostic
 		                (EObjectValidator.DIAGNOSTIC_SOURCE,
 		                        0,
@@ -874,6 +885,41 @@ class RuntimeModel implements IGenerator {
 		    public «modelName»ModelResourceSupport get«modelName»ModelResourceSupport() {
 		        return this.«modelName.decapitalize»ModelResourceSupport;
 		    }
+		    
+		    // TODO: Create ticket on Eclipse. The proble is that the DelegatingResourceLocator
+		    // creating a baseURL which ends with two trailing slash and the ResourceBundle cannot open the files.
+			// Ugly hack: The EcorePlugin baseUri has an extra trailing slash
+			// on OSGi, so we try to fix it
+			private static void fixEcoreUri() {
+			    try {
+			        URL baseUrl = EcorePlugin.INSTANCE.getBaseURL();
+			        if (baseUrl.toString().startsWith("bundle:") && baseUrl.toString().endsWith("//")) {
+			            URL fixedUrl = new URL(baseUrl.toString().substring(0, baseUrl.toString().length() - 1));
+			            Field myField = getField(DelegatingResourceLocator.class, "baseURL");
+			            myField.setAccessible(true);
+			            myField.set(EcorePlugin.INSTANCE, fixedUrl);
+			        }
+			    } catch (Throwable t) {
+			        t.printStackTrace(System.out);
+			    }
+			
+			}
+			
+			private static Field getField(Class clazz, String fieldName)
+			        throws NoSuchFieldException {
+			    try {
+			        return clazz.getDeclaredField(fieldName);
+			    } catch (NoSuchFieldException e) {
+			        Class superClass = clazz.getSuperclass();
+			        if (superClass == null) {
+			            throw e;
+			        } else {
+			            return getField(superClass, fieldName);
+			        }
+			    }
+			}
+			    
+		    
 		}
 	'''
 }
