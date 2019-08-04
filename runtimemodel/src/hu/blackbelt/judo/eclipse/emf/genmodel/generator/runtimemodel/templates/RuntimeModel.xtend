@@ -37,6 +37,7 @@ class RuntimeModel implements IGenerator {
 		import java.util.Collections;
 		import java.util.Dictionary;
 		import java.util.Hashtable;
+		import java.util.List;
 		import java.util.Map;
 		import java.util.Optional;
 		import java.util.Set;
@@ -150,12 +151,22 @@ class RuntimeModel implements IGenerator {
 		    }
 		
 		    /**
+		     * Add content to the given model's root.
+		     * @return
+		     */
+		    public «modelName»Model addContent(EObject object) {
+		        getResource().getContents().add(object);
+		        return this;
+		    }
+		
+		    /**
 		     * Load an model. {@link LoadArguments.LoadArgumentsBuilder} contains all parameter
 		     * @param loadArgumentsBuilder
 		     * @return
 		     * @throws IOException
+			 * @throws «modelName»ValidationException
 		     */
-		    public static «modelName»Model load«modelName»Model(LoadArguments.LoadArgumentsBuilder loadArgumentsBuilder) throws IOException {
+		    public static «modelName»Model load«modelName»Model(LoadArguments.LoadArgumentsBuilder loadArgumentsBuilder) throws IOException, «modelName»ValidationException {
 		        return load«modelName»Model(loadArgumentsBuilder.build());
 		    }
 		
@@ -164,59 +175,106 @@ class RuntimeModel implements IGenerator {
 		     * @param loadArguments
 		     * @return
 		     * @throws IOException
+			 * @throws «modelName»ValidationException
 		     */
-		    public static «modelName»Model load«modelName»Model(LoadArguments loadArguments) throws IOException {
-		        «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport = loadArguments.«modelName.decapitalize»ModelResourceSupport.orElseGet(() -> «modelName»ModelResourceSupport.«modelName.decapitalize»ModelResourceSupportBuilder()
-		        	.resourceSet(loadArguments.resourceSet.orElse(null))
-		        	.rootUri(loadArguments.rootUri).uriHandler(loadArguments.uriHandler)
-		        	.build());
-		        «modelName»ModelBuilder b = «modelName»Model.build«modelName»Model();
-		        b.name(loadArguments.name)
+		    public static «modelName»Model load«modelName»Model(LoadArguments loadArguments) throws IOException, «modelName»ValidationException {
+		        «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport = loadArguments.«modelName.decapitalize»ModelResourceSupport
+		        	.orElseGet(() -> «modelName»ModelResourceSupport.«modelName.decapitalize»ModelResourceSupportBuilder()
+			        	.resourceSet(loadArguments.resourceSet.orElse(null))
+			        	.rootUri(loadArguments.rootUri).uriHandler(loadArguments.uriHandler)
+			        	.build());
+
+		        «modelName»Model «modelName.decapitalize»Model = «modelName»Model.build«modelName»Model()
+		        	.name(loadArguments.name)
 		        	.version(loadArguments.version.orElse("1.0.0"))
 		        	.uri(loadArguments.uri)
 		        	.checksum(loadArguments.checksum.orElse("NON-DEFINED"))
 		        	.«modelName.decapitalize»ModelResourceSupport(«modelName.decapitalize»ModelResourceSupport)
-		        	.metaVersionRange(loadArguments.acceptedMetaVersionRange.orElse("[0,9999)"));
-		        «modelName»Model «modelName.decapitalize»Model = b.build();
-		        Resource resource = «modelName.decapitalize»Model.getResourceSet().createResource(loadArguments.uri);
-		        resource.load(loadArguments.loadOptions.orElse(«modelName»ModelResourceSupport.get«modelName»ModelDefaultLoadOptions()));
+		        	.metaVersionRange(loadArguments.acceptedMetaVersionRange.orElse("[0,9999)"))
+		        	.build();
+
 		        «modelName»ModelResourceSupport.setupRelativeUriRoot(«modelName.decapitalize»Model.getResourceSet(), loadArguments.uri);
+		        Resource resource = «modelName.decapitalize»Model.getResourceSet().createResource(loadArguments.uri);		
+		                
+				Map loadOptions = loadArguments.loadOptions
+					.orElseGet(() -> «modelName»ModelResourceSupport.get«modelName»ModelDefaultLoadOptions());				
+
+				try {
+				    InputStream inputStream = loadArguments.inputStream.orElseGet(() -> loadArguments.file.map(f -> {
+				        try {
+				            return new FileInputStream(f);
+				        } catch (FileNotFoundException e) {
+				            throw new RuntimeException(e);
+				        }
+				    }).orElse(null));
+
+				    if (inputStream != null) {
+				        resource.load(inputStream, loadOptions);
+				    } else {
+				        resource.load(loadOptions);
+				    }
+
+				} catch (RuntimeException e) {
+				    if (e.getCause() instanceof IOException) {
+				        throw (IOException) e.getCause();
+				    } else {
+				        throw e;
+				    }
+				}
+		        
+		        
+		        if (loadArguments.validateModel && !«modelName.decapitalize»Model.isValid()) {
+		            throw new «modelName»ValidationException(«modelName.decapitalize»Model);
+		        }
 		        return «modelName.decapitalize»Model;
 		    }
 		
 		    /**
 		     * Save the model to the given URI.
 		     * @throws IOException
+			 * @throws «modelName»ValidationException
 		     */
-		    public void save«modelName»Model() throws IOException {
-		        getResourceSet().getResource(getUri(), false).save(«modelName»ModelResourceSupport.get«modelName»ModelDefaultSaveOptions());
+		    public void save«modelName»Model() throws IOException, «modelName»ValidationException {
+		    	save«modelName»Model(SaveArguments.«modelName.decapitalize»SaveArgumentsBuilder());
 		    }
-		
+
 		    /**
 		     * Save the model as the given {@link SaveArguments.SaveArgumentsBuilder} defines
 		     * @param saveArgumentsBuilder
 		     * @throws IOException
+			 * @throws «modelName»ValidationException
 		     */
-		    public void save«modelName»Model(SaveArguments.SaveArgumentsBuilder saveArgumentsBuilder) throws IOException {
+		    public void save«modelName»Model(SaveArguments.SaveArgumentsBuilder saveArgumentsBuilder) throws IOException, «modelName»ValidationException {
 		        save«modelName»Model(saveArgumentsBuilder.build());
 		    }
+		    
 		
 		    /**
 		     * Save the model as the given {@link SaveArguments} defines
 		     * @param saveArguments
 		     * @throws IOException
+			 * @throws «modelName»ValidationException
 		     */
-		    public void save«modelName»Model(SaveArguments saveArguments) throws IOException {
+		    public void save«modelName»Model(SaveArguments saveArguments) throws IOException, «modelName»ValidationException {
+				if (saveArguments.validateModel && !isValid()) {
+				    throw new «modelName»ValidationException(this);
+				}
+		        Map saveOptions = saveArguments.saveOptions
+		        		.orElseGet(() -> «modelName»ModelResourceSupport.get«modelName»ModelDefaultSaveOptions());				
 		        try {
-		            OutputStream outputStream = saveArguments.outputStream.orElseGet(() -> saveArguments.file.map(f -> {
+		            OutputStream outputStream = saveArguments.outputStream
+		            		.orElseGet(() -> saveArguments.file.map(f -> {
 		                try {
 		                    return new FileOutputStream(f);
 		                } catch (FileNotFoundException e) {
 		                    throw new RuntimeException(e);
 		                }
 		            }).orElse(null));
-		            getResourceSet().getResource(getUri(), false).save(outputStream, 
-		            	saveArguments.saveOptions.orElseGet(() -> «modelName»ModelResourceSupport.get«modelName»ModelDefaultSaveOptions()));
+					if (outputStream != null) {
+					    getResource().save(outputStream, saveOptions);
+					} else {
+					    getResource().save(saveOptions);
+					}
 		        } catch (RuntimeException e) {
 		            if (e.getCause() instanceof IOException) {
 		                throw (IOException) e.getCause();
@@ -278,8 +336,8 @@ class RuntimeModel implements IGenerator {
 		    public String asString() {
 		        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		        try {
-		            save«modelName»Model(SaveArguments.«modelName.decapitalize»SaveArgumentsBuilder().outputStream(byteArrayOutputStream).build());
-		            getResourceSet().getResource(getUri(), false).save(byteArrayOutputStream, Collections.EMPTY_MAP);
+					// Do not call save on model to bypass the validation
+					getResource().save(byteArrayOutputStream, Collections.EMPTY_MAP);
 		        } catch (IOException e) {
 		        }
 		        return new String(byteArrayOutputStream.toByteArray(), Charset.defaultCharset());
@@ -291,6 +349,22 @@ class RuntimeModel implements IGenerator {
 		     */
 		    public String getDiagnosticsAsString() {
 		        return getDiagnostics().stream().map(d -> d.toString()).collect(Collectors.joining("\n"));
+		    }
+		
+		
+		    /**
+		     * This exception is thrown when validateModel is true on load or save and the model is not conform with its
+		     * defined metamodel.
+		     */
+		    public static class «modelName»ValidationException extends Exception {
+		        «modelName»Model «modelName.decapitalize»Model;
+		
+		        public «modelName»ValidationException(«modelName»Model «modelName.decapitalize»Model) {
+		            super("Invalid model\n" +
+		                    «modelName.decapitalize»Model.getDiagnosticsAsString() + "\n" + «modelName.decapitalize»Model.asString()
+		            );
+		            this.«modelName.decapitalize»Model = «modelName.decapitalize»Model;
+		        }
 		    }
 		
 		    /**
@@ -308,6 +382,9 @@ class RuntimeModel implements IGenerator {
 		        Optional<String> checksum;
 		        Optional<String> acceptedMetaVersionRange;
 		        Optional<Map<Object, Object>> loadOptions;
+		        boolean validateModel = true;
+		        Optional<InputStream> inputStream;
+		        Optional<File> file;
 		
 		        @java.lang.SuppressWarnings("all")
 		        private static Optional<«modelName»ModelResourceSupport> $default$«modelName.decapitalize»ModelResourceSupport() {
@@ -341,6 +418,16 @@ class RuntimeModel implements IGenerator {
 		
 		        @java.lang.SuppressWarnings("all")
 		        private static Optional<String> $default$acceptedMetaVersionRange() {
+		            return Optional.empty();
+		        }
+		
+		        @java.lang.SuppressWarnings("all")
+		        private static Optional<File> $default$file() {
+		            return Optional.empty();
+		        }
+		
+		        @java.lang.SuppressWarnings("all")
+		        private static Optional<InputStream> $default$inputStream() {
 		            return Optional.empty();
 		        }
 		
@@ -391,6 +478,18 @@ class RuntimeModel implements IGenerator {
 		            private boolean loadOptions$set;
 		            @java.lang.SuppressWarnings("all")
 		            private Optional<Map<Object, Object>> loadOptions;
+		
+		            private boolean validateModel = true;
+		
+		            @java.lang.SuppressWarnings("all")
+		            private boolean file$set;
+		            @java.lang.SuppressWarnings("all")
+		            private Optional<File> file;
+		
+		            @java.lang.SuppressWarnings("all")
+		            private boolean inputStream$set;
+		            @java.lang.SuppressWarnings("all")
+		            private Optional<InputStream> inputStream;
 		
 		            @java.lang.SuppressWarnings("all")
 		            LoadArgumentsBuilder() {
@@ -499,6 +598,37 @@ class RuntimeModel implements IGenerator {
 		            }
 		
 		            @java.lang.SuppressWarnings("all")
+		            /**
+		             * Defines that model validation required or not on load. Default: true
+		             */
+		            public LoadArgumentsBuilder validateModel(boolean validateModel) {
+		                this.validateModel = validateModel;
+		                return this;
+		            }
+
+		            @java.lang.SuppressWarnings("all")
+		            /**
+		             * Defines the file if it is not loaded from URI. If not defined, URI is used. If inputStream is defined
+		             * it is used.
+		             */
+		            public LoadArgumentsBuilder file(final File file) {
+		                this.file = Optional.of(file);
+		                file$set = true;
+		                return this;
+		            }
+		
+		            @java.lang.SuppressWarnings("all")
+		            /**
+		             * Defines the file if it is not loaded from  File or URI. If not defined, File or URI is used.
+		             */
+		            public LoadArgumentsBuilder inputStream(final InputStream inputStream) {
+		                this.inputStream = Optional.of(inputStream);
+		                inputStream$set = true;
+		                return this;
+		            }
+		
+
+		            @java.lang.SuppressWarnings("all")
 		            public LoadArguments build() {
 		                Optional<«modelName»ModelResourceSupport> «modelName.decapitalize»ModelResourceSupport = this.«modelName.decapitalize»ModelResourceSupport;
 		                if (!«modelName.decapitalize»ModelResourceSupport$set) «modelName.decapitalize»ModelResourceSupport = LoadArguments.$default$«modelName.decapitalize»ModelResourceSupport();
@@ -516,7 +646,13 @@ class RuntimeModel implements IGenerator {
 		                if (!acceptedMetaVersionRange$set) acceptedMetaVersionRange = LoadArguments.$default$acceptedMetaVersionRange();
 		                Optional<Map<Object, Object>> loadOptions = this.loadOptions;
 		                if (!loadOptions$set) loadOptions = LoadArguments.$default$loadOptions();
-		                return new LoadArguments(uri, name, «modelName.decapitalize»ModelResourceSupport, rootUri, uriHandler, resourceSet, version, checksum, acceptedMetaVersionRange, loadOptions);
+		                Optional<File> file = this.file;
+		                if (!file$set) file = LoadArguments.$default$file();
+		                Optional<InputStream> inputStream = this.inputStream;
+		                if (!inputStream$set) inputStream = LoadArguments.$default$inputStream();
+
+		                return new LoadArguments(uri, name, «modelName.decapitalize»ModelResourceSupport, rootUri, uriHandler, 
+		                		resourceSet, version, checksum, acceptedMetaVersionRange, loadOptions, validateModel, file, inputStream);
 		            }
 		
 		            @java.lang.Override
@@ -531,7 +667,11 @@ class RuntimeModel implements IGenerator {
 		                	+ ", version=" + this.version 
 		                	+ ", checksum=" + this.checksum 
 		                	+ ", acceptedMetaVersionRange=" + this.acceptedMetaVersionRange 
-		                	+ ", loadOptions=" + this.loadOptions + ")";
+		                	+ ", loadOptions=" + this.loadOptions 
+		                	+ ", validateModel=" + this.validateModel 
+					        + ", file=" + this.file
+					        + ", inputStream=" + this.inputStream
+		                	+ ")";
 		            }
 		        }
 		
@@ -550,7 +690,10 @@ class RuntimeModel implements IGenerator {
 				        	final Optional<String> version, 
 				        	final Optional<String> checksum, 
 				        	final Optional<String> acceptedMetaVersionRange, 
-				        	final Optional<Map<Object, Object>> loadOptions) {
+				        	final Optional<Map<Object, Object>> loadOptions,
+							final boolean validateModel,
+							final Optional<File> file,
+							final Optional<InputStream> inputStream) {
 		            this.uri = uri;
 		            this.name = name;
 		            this.«modelName.decapitalize»ModelResourceSupport = «modelName.decapitalize»ModelResourceSupport;
@@ -561,6 +704,9 @@ class RuntimeModel implements IGenerator {
 		            this.checksum = checksum;
 		            this.acceptedMetaVersionRange = acceptedMetaVersionRange;
 		            this.loadOptions = loadOptions;
+		            this.validateModel = validateModel;
+			        this.file = file;
+			        this.inputStream = inputStream;
 		        }
 		    }
 		
@@ -573,6 +719,7 @@ class RuntimeModel implements IGenerator {
 		        Optional<OutputStream> outputStream;
 		        Optional<File> file;
 		        Optional<Map<Object, Object>> saveOptions;
+		        boolean validateModel = true;
 		
 		        @java.lang.SuppressWarnings("all")
 		        private static Optional<OutputStream> $default$outputStream() {
@@ -607,6 +754,8 @@ class RuntimeModel implements IGenerator {
 		            private boolean saveOptions$set;
 		            @java.lang.SuppressWarnings("all")
 		            private Optional<Map<Object, Object>> saveOptions;
+		            
+		            private boolean validateModel = true;
 		
 		            @java.lang.SuppressWarnings("all")
 		            SaveArgumentsBuilder() {
@@ -642,6 +791,14 @@ class RuntimeModel implements IGenerator {
 		                return this;
 		            }
 		
+		            /**
+		             * Defines that model validation required or not on save. Default: true
+		             */
+		            public SaveArgumentsBuilder validateModel(boolean validateModel) {
+		                this.validateModel = validateModel;
+		                return this;
+		            }
+		
 		            @java.lang.SuppressWarnings("all")
 		            public SaveArguments build() {
 		                Optional<OutputStream> outputStream = this.outputStream;
@@ -650,7 +807,7 @@ class RuntimeModel implements IGenerator {
 		                if (!file$set) file = SaveArguments.$default$file();
 		                Optional<Map<Object, Object>> saveOptions = this.saveOptions;
 		                if (!saveOptions$set) saveOptions = SaveArguments.$default$saveOptions();
-		                return new SaveArguments(outputStream, file, saveOptions);
+		                return new SaveArguments(outputStream, file, saveOptions, validateModel);
 		            }
 		
 		            @java.lang.Override
@@ -666,10 +823,14 @@ class RuntimeModel implements IGenerator {
 		        }
 		
 		        @java.lang.SuppressWarnings("all")
-		        private SaveArguments(final Optional<OutputStream> outputStream, final Optional<File> file, final Optional<Map<Object, Object>> saveOptions) {
+		        private SaveArguments(final Optional<OutputStream> outputStream, 
+		        						final Optional<File> file, 
+		        						final Optional<Map<Object, Object>> saveOptions,
+		        						final boolean validateModel) {
 		            this.outputStream = outputStream;
 		            this.file = file;
 		            this.saveOptions = saveOptions;
+		            this.validateModel = validateModel;
 		        }
 		    }
 		
@@ -824,7 +985,9 @@ class RuntimeModel implements IGenerator {
 		        this.uri = uri;
 		        this.checksum = checksum.orElse("notused");
 		        this.metaVersionRange = metaVersionRange.orElse("[1.0,2)");
-		        this.«modelName.decapitalize»ModelResourceSupport = «modelName.decapitalize»ModelResourceSupport.orElse(«modelName»ModelResourceSupport.«modelName.decapitalize»ModelResourceSupportBuilder().resourceSet(«modelName»ModelResourceSupport.create«modelName»ResourceSet()).build());
+		        this.«modelName.decapitalize»ModelResourceSupport = «modelName.decapitalize»ModelResourceSupport
+		        	.orElseGet(() -> «modelName»ModelResourceSupport.«modelName.decapitalize»ModelResourceSupportBuilder()
+		        			.resourceSet(«modelName»ModelResourceSupport.create«modelName»ResourceSet()).build());
 		    }
 		
 		    @java.lang.Override
