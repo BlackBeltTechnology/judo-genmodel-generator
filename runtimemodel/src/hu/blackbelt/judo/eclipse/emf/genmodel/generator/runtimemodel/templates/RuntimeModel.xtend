@@ -20,7 +20,6 @@ class RuntimeModel implements IGenerator {
 	'''
 		package «packageName».runtime;
 		
-		import org.eclipse.emf.common.util.BasicDiagnostic;
 		import org.eclipse.emf.common.util.Diagnostic;
 		import org.eclipse.emf.common.util.URI;
 		import org.eclipse.emf.ecore.EObject;
@@ -29,31 +28,19 @@ class RuntimeModel implements IGenerator {
 		import org.eclipse.emf.ecore.resource.URIHandler;
 		
 		import «packageName».support.«modelName»ModelResourceSupport;
-		import org.eclipse.emf.ecore.util.Diagnostician;
-		import org.eclipse.emf.ecore.util.EObjectValidator;
 		
 		import java.io.*;
-		import java.nio.charset.Charset;
-		import java.util.Collections;
 		import java.util.Dictionary;
 		import java.util.Hashtable;
-		import java.util.List;
 		import java.util.Map;
 		import java.util.Optional;
 		import java.util.Set;
-		import java.util.concurrent.ConcurrentHashMap;
-		import java.util.function.Function;
-		import java.util.function.Predicate;
-		import java.util.stream.Collectors;
 		
-		// Import for EClipse URI fix hack
-		import org.eclipse.emf.common.util.DelegatingResourceLocator;
-		import org.eclipse.emf.ecore.plugin.EcorePlugin;
+		import static «packageName».support.«modelName»ModelResourceSupport.setupRelativeUriRoot;
+		import static java.util.Objects.requireNonNull;
+		import static java.util.Optional.ofNullable;
 		
-		import java.lang.reflect.Field;
-		import java.net.URL;
-		
-		
+				
 		/**
 		 * A wrapper class on a «modelName» metamodel based model. This wrapper organizing the model a structure which can be used
 		 * in Tatami as a logical model.
@@ -81,10 +68,7 @@ class RuntimeModel implements IGenerator {
 		 *                 .name("test")
 		 *                 .version("1.0.0")
 		 *                 .uri(URI.createURI("urn:test.«modelName.decapitalize»"))
-		 *                 .«modelName.decapitalize»ModelResourceSupport(
-		 *                         «modelName.decapitalize»ModelResourceSupportBuilder()
-		 *                                 .uriHandler(bundleURIHandler)
-		 *                                 .build())
+		 *                 .uriHandler(bundleURIHandler)
 		 *                 .metaVersionRange(bundleContext.getBundle().getHeaders().get("[1.0,2))).build();
 		 * </pre>
 		 *
@@ -99,20 +83,19 @@ class RuntimeModel implements IGenerator {
 		 */
 		public class «modelName»Model {
 		
-		    public static Diagnostician diagnostician = new Diagnostician();
-		
 		    public static final String NAME = "name";
 		    public static final String VERSION = "version";
 		    public static final String CHECKSUM = "checksum";
 		    public static final String META_VERSION_RANGE = "meta-version-range";
 		    public static final String URI = "uri";
 		    public static final String RESOURCESET = "resourceset";
-		    String name;
-		    String version;
-		    URI uri;
-		    String checksum;
-		    String metaVersionRange;
-		    «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport;
+		
+		    private String name;
+		    private String version;
+		    private URI uri;
+		    private String checksum;
+		    private String metaVersionRange;
+		    private «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport;
 		
 		    /**
 		     * Return all properties as a {@link Dictionary}
@@ -131,7 +114,7 @@ class RuntimeModel implements IGenerator {
 		
 		    /**
 		     * Get the model's isolated {@link ResourceSet}
-		     * @return
+		     * @return instance of {@link ResourceSet}
 		     */
 		    public ResourceSet getResourceSet() {
 		        return «modelName.decapitalize»ModelResourceSupport.getResourceSet();
@@ -141,7 +124,7 @@ class RuntimeModel implements IGenerator {
 		    /**
 		     * Get the model's root resource which represents the mdoel's uri {@link URI} itself.
 		     * If the given resource does not exists new one is created.
-		     * @return
+		     * @return instance of {@link Resource}
 		     */
 		    public Resource getResource() {
 		        if (getResourceSet().getResource(uri, false) == null) {
@@ -152,129 +135,63 @@ class RuntimeModel implements IGenerator {
 		
 		    /**
 		     * Add content to the given model's root.
-		     * @return
+		     * @param object Object to add to resource.
+		     * @return return this instance
 		     */
+		    @SuppressWarnings("UnusedReturnValue")
 		    public «modelName»Model addContent(EObject object) {
 		        getResource().getContents().add(object);
 		        return this;
 		    }
 		
 		    /**
-		     * Load an model. {@link LoadArguments.LoadArgumentsBuilder} contains all parameter
-		     * @param loadArgumentsBuilder
-		     * @return
-		     * @throws IOException
-			 * @throws «modelName»ValidationException
+		     * Load an model into {@link «modelName»Model} default {@link Resource}.
+		     * The {@link URI}, {@link URIHandler} and {@link ResourceSet} arguments are not used here, because it has
+		     * already set.
+		     * @param loadArgumentsBuilder {@link LoadArguments.LoadArgumentsBuilder} used for load.
+		     * @return this {@link «modelName»ModelResourceSupport}
+		     * @throws IOException when IO error occured
+		     * @throws «modelName»ValidationException when model validation is true and the model is invalid.
 		     */
-		    public static «modelName»Model load«modelName»Model(LoadArguments.LoadArgumentsBuilder loadArgumentsBuilder) throws IOException, «modelName»ValidationException {
-		        return load«modelName»Model(loadArgumentsBuilder.build());
+		    public «modelName»Model loadResource(LoadArguments.LoadArgumentsBuilder
+		                                                        loadArgumentsBuilder)
+		            throws IOException, «modelName»ValidationException {
+		        return loadResource(loadArgumentsBuilder.build());
 		    }
 		
 		    /**
-		     * Load an model. {@link LoadArguments} contains all parameter
-		     * @param loadArguments
-		     * @return
-		     * @throws IOException
-			 * @throws «modelName»ValidationException
+		     * Load an model into {@link «modelName»Model} default {@link Resource}.
+		     * The {@link URI}, {@link URIHandler} and {@link ResourceSet} arguments are not used here, because it has
+		     * already set.
+		     * @param loadArguments {@link LoadArguments} used for load.
+		     * @return this {@link «modelName»ModelResourceSupport}
+		     * @throws IOException when IO error occured
+		     * @throws «modelName»ValidationException when model validation is true and the model is invalid.
 		     */
-		    public static «modelName»Model load«modelName»Model(LoadArguments loadArguments) throws IOException, «modelName»ValidationException {
-		        «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport = loadArguments.«modelName.decapitalize»ModelResourceSupport
-		        	.orElseGet(() -> «modelName»ModelResourceSupport.«modelName.decapitalize»ModelResourceSupportBuilder()
-			        	.resourceSet(loadArguments.resourceSet.orElse(null))
-			        	.rootUri(loadArguments.rootUri).uriHandler(loadArguments.uriHandler)
-			        	.build());
-
-		        «modelName»Model «modelName.decapitalize»Model = «modelName»Model.build«modelName»Model()
-		        	.name(loadArguments.name)
-		        	.version(loadArguments.version.orElse("1.0.0"))
-		        	.uri(loadArguments.uri)
-		        	.checksum(loadArguments.checksum.orElse("NON-DEFINED"))
-		        	.«modelName.decapitalize»ModelResourceSupport(«modelName.decapitalize»ModelResourceSupport)
-		        	.metaVersionRange(loadArguments.acceptedMetaVersionRange.orElse("[0,9999)"))
-		        	.build();
-
-		        «modelName»ModelResourceSupport.setupRelativeUriRoot(«modelName.decapitalize»Model.getResourceSet(), loadArguments.uri);
-		        Resource resource = «modelName.decapitalize»Model.getResourceSet().createResource(loadArguments.uri);		
-		                
-				Map loadOptions = loadArguments.loadOptions
-					.orElseGet(() -> «modelName»ModelResourceSupport.get«modelName»ModelDefaultLoadOptions());				
-
-				try {
-				    InputStream inputStream = loadArguments.inputStream.orElseGet(() -> loadArguments.file.map(f -> {
-				        try {
-				            return new FileInputStream(f);
-				        } catch (FileNotFoundException e) {
-				            throw new RuntimeException(e);
-				        }
-				    }).orElse(null));
-
-				    if (inputStream != null) {
-				        resource.load(inputStream, loadOptions);
-				    } else {
-				        resource.load(loadOptions);
-				    }
-
-				} catch (RuntimeException e) {
-				    if (e.getCause() instanceof IOException) {
-				        throw (IOException) e.getCause();
-				    } else {
-				        throw e;
-				    }
-				}
-		        
-		        
-		        if (loadArguments.validateModel && !«modelName.decapitalize»Model.isValid()) {
-		            throw new «modelName»ValidationException(«modelName.decapitalize»Model);
-		        }
-		        return «modelName.decapitalize»Model;
-		    }
+		    @SuppressWarnings("WeakerAccess")
+		    public «modelName»Model loadResource(LoadArguments loadArguments)
+		            throws IOException, «modelName»ValidationException {
 		
-		    /**
-		     * Save the model to the given URI.
-		     * @throws IOException
-			 * @throws «modelName»ValidationException
-		     */
-		    public void save«modelName»Model() throws IOException, «modelName»ValidationException {
-		    	save«modelName»Model(SaveArguments.«modelName.decapitalize»SaveArgumentsBuilder());
-		    }
-
-		    /**
-		     * Save the model as the given {@link SaveArguments.SaveArgumentsBuilder} defines
-		     * @param saveArgumentsBuilder
-		     * @throws IOException
-			 * @throws «modelName»ValidationException
-		     */
-		    public void save«modelName»Model(SaveArguments.SaveArgumentsBuilder saveArgumentsBuilder) throws IOException, «modelName»ValidationException {
-		        save«modelName»Model(saveArgumentsBuilder.build());
-		    }
-		    
+		        Resource resource = getResource();
+		        Map loadOptions = loadArguments.getLoadOptions()
+		                .orElseGet(«modelName»ModelResourceSupport::get«modelName»ModelDefaultLoadOptions);
 		
-		    /**
-		     * Save the model as the given {@link SaveArguments} defines
-		     * @param saveArguments
-		     * @throws IOException
-			 * @throws «modelName»ValidationException
-		     */
-		    public void save«modelName»Model(SaveArguments saveArguments) throws IOException, «modelName»ValidationException {
-				if (saveArguments.validateModel && !isValid()) {
-				    throw new «modelName»ValidationException(this);
-				}
-		        Map saveOptions = saveArguments.saveOptions
-		        		.orElseGet(() -> «modelName»ModelResourceSupport.get«modelName»ModelDefaultSaveOptions());				
 		        try {
-		            OutputStream outputStream = saveArguments.outputStream
-		            		.orElseGet(() -> saveArguments.file.map(f -> {
-		                try {
-		                    return new FileOutputStream(f);
-		                } catch (FileNotFoundException e) {
-		                    throw new RuntimeException(e);
-		                }
-		            }).orElse(null));
-					if (outputStream != null) {
-					    getResource().save(outputStream, saveOptions);
-					} else {
-					    getResource().save(saveOptions);
-					}
+		            InputStream inputStream = loadArguments.getInputStream()
+		                    .orElseGet(() -> loadArguments.getFile().map(f -> {
+		                        try {
+		                            return new FileInputStream(f);
+		                        } catch (FileNotFoundException e) {
+		                            throw new RuntimeException(e);
+		                        }
+		                    }).orElse(null));
+		
+		            if (inputStream != null) {
+		                resource.load(inputStream, loadOptions);
+		            } else {
+		                resource.load(loadOptions);
+		            }
+		
 		        } catch (RuntimeException e) {
 		            if (e.getCause() instanceof IOException) {
 		                throw (IOException) e.getCause();
@@ -282,80 +199,140 @@ class RuntimeModel implements IGenerator {
 		                throw e;
 		            }
 		        }
+		
+		        if (loadArguments.isValidateModel() && !isValid()) {
+		            throw new «modelName»ValidationException(this);
+		        }
+		        return this;
 		    }
 		
-		    private Diagnostic getDiagnostic(EObject eObject) {
-		    	
-		    	// Call the hack
-		    	fixEcoreUri();
-		        BasicDiagnostic diagnostics = new BasicDiagnostic
-		                (EObjectValidator.DIAGNOSTIC_SOURCE,
-		                        0,
-		                        String.format("Diagnosis of %s\n", new Object[] { diagnostician.getObjectLabel(eObject) }),
-		                        new Object [] { eObject });
-		        diagnostician.validate(eObject, diagnostics, diagnostician.createDefaultContext());
-		        return diagnostics;
+		    /**
+		     * Load an model. {@link LoadArguments.LoadArgumentsBuilder} contains all parameter
+		     * @param loadArgumentsBuilder {@link LoadArguments.LoadArgumentsBuilder} used for load
+		     * @return new {@link «modelName»Model} instance
+		     * @throws IOException when IO error occured
+		     * @throws «modelName»ValidationException when model validation is true and the model is invalid.
+		     */
+		    public static «modelName»Model load«modelName»Model(LoadArguments.LoadArgumentsBuilder loadArgumentsBuilder)
+		            throws IOException, «modelName»ValidationException {
+		        return load«modelName»Model(loadArgumentsBuilder.build());
 		    }
 		
-		    private static <T> Predicate<T> distinctByKey(
-		            Function<? super T, ?> keyExtractor) {
+		    /**
+		     * Load an model. {@link LoadArguments} contains all parameter
+		     * @param loadArguments {@link LoadArguments.LoadArgumentsBuilder} used for load
+		     * @return new {@link «modelName»Model} instance.
+		     * @throws IOException when IO error occured
+		     * @throws «modelName»ValidationException when model validation is true and the model is invalid.
+		     */
+		    public static «modelName»Model load«modelName»Model(LoadArguments loadArguments) throws IOException, «modelName»ValidationException {
+		        try {
+		            «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport = «modelName»ModelResourceSupport
+		                    .load«modelName»(loadArguments.to«modelName»ModelResourceSupportLoadArgumentsBuilder()
+		                            .validateModel(false));
+		            «modelName»Model «modelName.decapitalize»Model = build«modelName»Model()
+		                    .name(loadArguments.getName()
+		                            .orElseThrow(() -> new IllegalArgumentException("Name is mandatory")))
+		                    .version(loadArguments.getVersion()
+		                            .orElse("1.0.0"))
+		                    .uri(loadArguments.getUri()
+		                            .orElseThrow(() -> new IllegalArgumentException("URI is mandatory")))
+		                    .checksum(loadArguments.getChecksum()
+		                            .orElse("NON-DEFINED"))
+		                    .«modelName.decapitalize»ModelResourceSupport(«modelName.decapitalize»ModelResourceSupport)
+		                    .metaVersionRange(loadArguments.getAcceptedMetaVersionRange()
+		                            .orElse("[0,9999)"))
+		                    .build();
 		
-		        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
-		        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+		            setupRelativeUriRoot(«modelName.decapitalize»Model.getResourceSet(), loadArguments.uri);
+		
+		            if (loadArguments.validateModel && !«modelName.decapitalize»ModelResourceSupport.isValid()) {
+		                throw new «modelName»ValidationException(«modelName.decapitalize»Model);
+		            }
+		            return «modelName.decapitalize»Model;
+		
+		        } catch («modelName»ModelResourceSupport.«modelName»ValidationException ignore) {
+		            throw new IllegalStateException("This exception generated because the code is broken");
+		        }
+		    }
+		
+		    /**
+		     * Save the model to the given URI.
+		     * @throws IOException when IO error occurred
+		     * @throws «modelName»ValidationException when model validation is true and the model is invalid.
+		     */
+		    public void save«modelName»Model() throws IOException, «modelName»ValidationException {
+		        save«modelName»Model(SaveArguments.«modelName.decapitalize»SaveArgumentsBuilder());
+		    }
+		
+		    /**
+		     * Save the model as the given {@link SaveArguments.SaveArgumentsBuilder} defines
+		     * @param saveArgumentsBuilder the {@link SaveArguments.SaveArgumentsBuilder} used for save
+		     * @throws IOException when IO error occurred
+		     * @throws «modelName»ValidationException when model validation is true and the model is invalid.
+		     */
+		    public void save«modelName»Model(SaveArguments.SaveArgumentsBuilder saveArgumentsBuilder)
+		            throws IOException, «modelName»ValidationException {
+		        save«modelName»Model(saveArgumentsBuilder.build());
+		    }
+		
+		    /**
+		     * Save the model as the given {@link SaveArguments} defines
+		     * @param saveArguments the {@link SaveArguments} used for save
+		     * @throws IOException when IO error occurred
+		     * @throws «modelName»ValidationException when model validation is true and the model is invalid.
+		     */
+		    public void save«modelName»Model(SaveArguments saveArguments) throws IOException, «modelName»ValidationException {
+		        if (saveArguments.validateModel && !«modelName.decapitalize»ModelResourceSupport.isValid()) {
+		            throw new «modelName»ValidationException(this);
+		        }
+		        try {
+		            «modelName.decapitalize»ModelResourceSupport.save«modelName»(saveArguments.to«modelName»ModelResourceSupportSaveArgumentsBuilder()
+		                    .validateModel(false));
+		        } catch («modelName»ModelResourceSupport.«modelName»ValidationException e) {
+		            // Validation disaled, this exception cannot be thrown
+		        }
 		    }
 		
 		    /**
 		     * Get distinct diagnostics for model. Only  {@link Diagnostic}.WARN and {@link Diagnostic}.ERROR are returns.
-		     * @return
+		     * @return set of {@link Diagnostic}
 		     */
 		    public Set<Diagnostic> getDiagnostics() {
-		        return get«modelName»ModelResourceSupport().all()
-		                .filter(EObject.class :: isInstance)
-		                .map(EObject.class :: cast)
-		                .map(e -> getDiagnostic(e))
-		                .filter(d -> d.getSeverity() > Diagnostic.INFO)
-		                .filter(d -> d.getChildren().size() > 0)
-		                .flatMap(d -> d.getChildren().stream())
-		                .filter(distinctByKey(e -> e.toString()))
-		                .collect(Collectors.toSet());
+		        return «modelName.decapitalize»ModelResourceSupport.getDiagnostics();
 		    }
 		
 		    /**
 		     * Checks the model have any {@link Diagnostic}.ERROR diagnostics. When there is no any the model assumed as valid.
-		     * @return
+		     * @return true when model is valid
 		     */
 		    public boolean isValid() {
-		        Set<Diagnostic> diagnostics = getDiagnostics();
-		        return !diagnostics.stream().filter(e -> e.getSeverity() >= Diagnostic.ERROR).findAny().isPresent();
+		        return «modelName.decapitalize»ModelResourceSupport.isValid();
 		    }
 		
 		    /**
 		     * Print model as string
-		     * @return
+		     * @return model as XML string
 		     */
+		    @SuppressWarnings("WeakerAccess")
 		    public String asString() {
-		        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		        try {
-					// Do not call save on model to bypass the validation
-					getResource().save(byteArrayOutputStream, Collections.EMPTY_MAP);
-		        } catch (IOException e) {
-		        }
-		        return new String(byteArrayOutputStream.toByteArray(), Charset.defaultCharset());
+		        return «modelName.decapitalize»ModelResourceSupport.asString();
 		    }
 		
 		    /**
 		     * Get diagnostics as a String
-		     * @return
+		     * @return diagnostic list as string. Every line represents one diagnostic.
 		     */
+		    @SuppressWarnings("WeakerAccess")
 		    public String getDiagnosticsAsString() {
-		        return getDiagnostics().stream().map(d -> d.toString()).collect(Collectors.joining("\n"));
+		        return «modelName.decapitalize»ModelResourceSupport.getDiagnosticsAsString();
 		    }
-		
 		
 		    /**
 		     * This exception is thrown when validateModel is true on load or save and the model is not conform with its
 		     * defined metamodel.
 		     */
+		    @SuppressWarnings("WeakerAccess")
 		    public static class «modelName»ValidationException extends Exception {
 		        «modelName»Model «modelName.decapitalize»Model;
 		
@@ -374,230 +351,218 @@ class RuntimeModel implements IGenerator {
 		    public static class LoadArguments {
 		        URI uri;
 		        String name;
-		        Optional<«modelName»ModelResourceSupport> «modelName.decapitalize»ModelResourceSupport;
-		        Optional<URI> rootUri;
-		        Optional<URIHandler> uriHandler;
-		        Optional<ResourceSet> resourceSet;
-		        Optional<String> version;
-		        Optional<String> checksum;
-		        Optional<String> acceptedMetaVersionRange;
-		        Optional<Map<Object, Object>> loadOptions;
-		        boolean validateModel = true;
-		        Optional<InputStream> inputStream;
-		        Optional<File> file;
+		        URIHandler uriHandler;
+		        ResourceSet resourceSet;
+		        String version;
+		        String checksum;
+		        String acceptedMetaVersionRange;
+		        Map<Object, Object> loadOptions;
+		        boolean validateModel;
+		        InputStream inputStream;
+		        File file;
 		
-		        @java.lang.SuppressWarnings("all")
-		        private static Optional<«modelName»ModelResourceSupport> $default$«modelName.decapitalize»ModelResourceSupport() {
-		            return Optional.empty();
+		        private static URIHandler $default$uriHandler() {
+		            return null;
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
-		        private static Optional<URI> $default$rootUri() {
-		            return Optional.empty();
+		        private static ResourceSet $default$resourceSet() {
+		            return null;
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
-		        private static Optional<URIHandler> $default$uriHandler() {
-		            return Optional.empty();
+		        private static String $default$version() {
+		            return "1.0.0";
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
-		        private static Optional<ResourceSet> $default$resourceSet() {
-		            return Optional.empty();
+		        private static String $default$checksum() {
+		            return "NOT-SET";
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
-		        private static Optional<String> $default$version() {
-		            return Optional.empty();
+		        private static String $default$acceptedMetaVersionRange() {
+		            return "[0,9999]";
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
-		        private static Optional<String> $default$checksum() {
-		            return Optional.empty();
+		        private static File $default$file() {
+		            return null;
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
-		        private static Optional<String> $default$acceptedMetaVersionRange() {
-		            return Optional.empty();
+		        private static InputStream $default$inputStream() {
+		            return null;
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
-		        private static Optional<File> $default$file() {
-		            return Optional.empty();
+		        private static Map<Object, Object> $default$loadOptions() {
+		            return «modelName»ModelResourceSupport.get«modelName»ModelDefaultLoadOptions();
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
-		        private static Optional<InputStream> $default$inputStream() {
-		            return Optional.empty();
+		        Optional<URI> getUri() {
+		            return ofNullable(uri);
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
-		        private static Optional<Map<Object, Object>> $default$loadOptions() {
-		            return Optional.of(«modelName»ModelResourceSupport.get«modelName»ModelDefaultLoadOptions());
+		        Optional<String> getName() {
+		            return ofNullable(name);
 		        }
 		
+		        Optional<URIHandler> getUriHandler() {
+		            return ofNullable(uriHandler);
+		        }
 		
-		        @java.lang.SuppressWarnings("all")
+		        Optional<ResourceSet> getResourceSet() {
+		            return ofNullable(resourceSet);
+		        }
+		
+		        Optional<String> getVersion() {
+		            return ofNullable(version);
+		        }
+		
+		        Optional<String> getChecksum() {
+		            return ofNullable(checksum);
+		        }
+		
+		        Optional<String> getAcceptedMetaVersionRange() {
+		            return ofNullable(acceptedMetaVersionRange);
+		        }
+		
+		        Optional<Map<Object, Object>> getLoadOptions() {
+		            return ofNullable(loadOptions);
+		        }
+		
+		        boolean isValidateModel() {
+		            return validateModel;
+		        }
+		
+		        Optional<File> getFile() {
+		            return ofNullable(file);
+		        }
+		
+		        Optional<InputStream> getInputStream() {
+		            return ofNullable(inputStream);
+		        }
+		
 		        /**
 		         * Builder for {@link «modelName»Model#load«modelName»Model(LoadArguments)}.
 		         */
 		        public static class LoadArgumentsBuilder {
-		            @java.lang.SuppressWarnings("all")
 		            private URI uri;
-		            @java.lang.SuppressWarnings("all")
 		            private String name;
-		            @java.lang.SuppressWarnings("all")
-		            private boolean «modelName.decapitalize»ModelResourceSupport$set;
-		            @java.lang.SuppressWarnings("all")
-		            private Optional<«modelName»ModelResourceSupport> «modelName.decapitalize»ModelResourceSupport;
-		            @java.lang.SuppressWarnings("all")
-		            private boolean rootUri$set;
-		            @java.lang.SuppressWarnings("all")
-		            private Optional<URI> rootUri;
-		            @java.lang.SuppressWarnings("all")
+		
 		            private boolean uriHandler$set;
-		            @java.lang.SuppressWarnings("all")
-		            private Optional<URIHandler> uriHandler;
-		            @java.lang.SuppressWarnings("all")
+		            private URIHandler uriHandler;
+		            
 		            private boolean resourceSet$set;
-		            @java.lang.SuppressWarnings("all")
-		            private Optional<ResourceSet> resourceSet;
-		            @java.lang.SuppressWarnings("all")
+		            private ResourceSet resourceSet;
+		            
 		            private boolean version$set;
-		            @java.lang.SuppressWarnings("all")
-		            private Optional<String> version;
-		            @java.lang.SuppressWarnings("all")
+		            private String version;
+		            
 		            private boolean checksum$set;
-		            @java.lang.SuppressWarnings("all")
-		            private Optional<String> checksum;
-		            @java.lang.SuppressWarnings("all")
+		            private String checksum;
+		            
 		            private boolean acceptedMetaVersionRange$set;
-		            @java.lang.SuppressWarnings("all")
-		            private Optional<String> acceptedMetaVersionRange;
-		            @java.lang.SuppressWarnings("all")
+		            private String acceptedMetaVersionRange;
+		            
 		            private boolean loadOptions$set;
-		            @java.lang.SuppressWarnings("all")
-		            private Optional<Map<Object, Object>> loadOptions;
+		            private Map<Object, Object> loadOptions;
 		
 		            private boolean validateModel = true;
 		
-		            @java.lang.SuppressWarnings("all")
 		            private boolean file$set;
-		            @java.lang.SuppressWarnings("all")
-		            private Optional<File> file;
+		            private File file;
 		
-		            @java.lang.SuppressWarnings("all")
+		            
 		            private boolean inputStream$set;
-		            @java.lang.SuppressWarnings("all")
-		            private Optional<InputStream> inputStream;
+		            private InputStream inputStream;
 		
-		            @java.lang.SuppressWarnings("all")
+		            
 		            LoadArgumentsBuilder() {
 		            }
 		
-		            @java.lang.SuppressWarnings("all")
 		            /**
 		             * Defines the {@link URI} of the model.
 		             * This is mandatory.
 		             */
 		            public LoadArgumentsBuilder uri(final URI uri) {
+		                requireNonNull(uri);
 		                this.uri = uri;
 		                return this;
 		            }
 		
-		            @java.lang.SuppressWarnings("all")
+		            
 		            /**
 		             * Defines the name of the model.
 		             * This is mandatory.
 		             */
 		            public LoadArgumentsBuilder name(final String name) {
+		                requireNonNull(name);
 		                this.name = name;
 		                return this;
 		            }
 		
-		            @java.lang.SuppressWarnings("all")
-		            /**
-		             * Defines the {@link «modelName»ModelResourceSupport} for model.
-		             * If its not defined a default one is created based on default {@link ResourceSet}
-		             */
-		            public LoadArgumentsBuilder «modelName.decapitalize»ModelResourceSupport(final «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport) {
-		                this.«modelName.decapitalize»ModelResourceSupport = Optional.of(«modelName.decapitalize»ModelResourceSupport);
-		                «modelName.decapitalize»ModelResourceSupport$set = true;
-		                return this;
-		            }
-		
-		            @java.lang.SuppressWarnings("all")
-		            /**
-		             * Defines the root uri {@link URI} for model.
-		             * If its not defined a default one is created based on the main resource.
-		             */
-		            public LoadArgumentsBuilder rootUri(final URI rootUri) {
-		                this.rootUri = Optional.of(rootUri);
-		                rootUri$set = true;
-		                return this;
-		            }
-		
-		            @java.lang.SuppressWarnings("all")
 		            /**
 		             * Defines the {@link URIHandler} used for model IO. If not defined the default is EMF used.
 		             */
 		            public LoadArgumentsBuilder uriHandler(final URIHandler uriHandler) {
-		                this.uriHandler = Optional.of(uriHandler);
+		                requireNonNull(uriHandler);
+		                this.uriHandler = uriHandler;
 		                uriHandler$set = true;
 		                return this;
 		            }
 		
-		            @java.lang.SuppressWarnings("all")
+		            
 		            /**
 		             * Defines the default {@link ResourceSet}. If it is not defined the factory based resourceSet is used.
 		             */
 		            public LoadArgumentsBuilder resourceSet(final ResourceSet resourceSet) {
-		                this.resourceSet = Optional.of(resourceSet);
+		                requireNonNull(resourceSet);
+		                this.resourceSet = resourceSet;
 		                resourceSet$set = true;
 		                return this;
 		            }
 		
-		            @java.lang.SuppressWarnings("all")
+		            
 		            /**
 		             * Defines the model version. If its not defined the version will be 1.0.0
 		             */
 		            public LoadArgumentsBuilder version(final String version) {
-		                this.version = Optional.of(version);
+		                requireNonNull(version);
+		                this.version = version;
 		                version$set = true;
 		                return this;
 		            }
 		
-		            @java.lang.SuppressWarnings("all")
+		            
 		            /**
 		             * Defines the model checksum. If its not defined 'notused' is defined.
 		             */
 		            public LoadArgumentsBuilder checksum(final String checksum) {
-		                this.checksum = Optional.of(checksum);
+		                requireNonNull(checksum);
+		                this.checksum = checksum;
 		                checksum$set = true;
 		                return this;
 		            }
 		
-		            @java.lang.SuppressWarnings("all")
+		            
 		            /**
-		             * Defines the accepted version range of the meta model. If its not defined [1.0,2) is used.
+		             * Defines the accepted version range of the meta model. If its not defined [1.0,999) is used.
 		             */
 		            public LoadArgumentsBuilder acceptedMetaVersionRange(final String acceptedMetaVersionRange) {
-		                this.acceptedMetaVersionRange = Optional.of(acceptedMetaVersionRange);
+		                requireNonNull(acceptedMetaVersionRange);
+		                this.acceptedMetaVersionRange = acceptedMetaVersionRange;
 		                acceptedMetaVersionRange$set = true;
 		                return this;
 		            }
 		
-		            @java.lang.SuppressWarnings("all")
+		            
 		            /**
-		             * Defines the load options for model. If not defined the {@link «modelName»Model#get«modelName»ModelDefaultLoadOptions()} us used.
+		             * Defines the load options for model. If not defined the
+		             * {@link «modelName»ModelResourceSupport#get«modelName»ModelDefaultLoadOptions()} us used.
 		             */
 		            public LoadArgumentsBuilder loadOptions(final Map<Object, Object> loadOptions) {
-		                this.loadOptions = Optional.of(loadOptions);
+		                requireNonNull(loadOptions);
+		                this.loadOptions = loadOptions;
 		                loadOptions$set = true;
 		                return this;
 		            }
 		
-		            @java.lang.SuppressWarnings("all")
+		            
 		            /**
 		             * Defines that model validation required or not on load. Default: true
 		             */
@@ -605,99 +570,90 @@ class RuntimeModel implements IGenerator {
 		                this.validateModel = validateModel;
 		                return this;
 		            }
-
-		            @java.lang.SuppressWarnings("all")
+		
+		            
 		            /**
 		             * Defines the file if it is not loaded from URI. If not defined, URI is used. If inputStream is defined
 		             * it is used.
 		             */
 		            public LoadArgumentsBuilder file(final File file) {
-		                this.file = Optional.of(file);
+		                requireNonNull(file);
+		                this.file = file;
 		                file$set = true;
 		                return this;
 		            }
 		
-		            @java.lang.SuppressWarnings("all")
+		            
 		            /**
 		             * Defines the file if it is not loaded from  File or URI. If not defined, File or URI is used.
 		             */
 		            public LoadArgumentsBuilder inputStream(final InputStream inputStream) {
-		                this.inputStream = Optional.of(inputStream);
+		                requireNonNull(inputStream);
+		                this.inputStream = inputStream;
 		                inputStream$set = true;
 		                return this;
 		            }
 		
-
-		            @java.lang.SuppressWarnings("all")
 		            public LoadArguments build() {
-		                Optional<«modelName»ModelResourceSupport> «modelName.decapitalize»ModelResourceSupport = this.«modelName.decapitalize»ModelResourceSupport;
-		                if (!«modelName.decapitalize»ModelResourceSupport$set) «modelName.decapitalize»ModelResourceSupport = LoadArguments.$default$«modelName.decapitalize»ModelResourceSupport();
-		                Optional<URI> rootUri = this.rootUri;
-		                if (!rootUri$set) rootUri = LoadArguments.$default$rootUri();
-		                Optional<URIHandler> uriHandler = this.uriHandler;
+		                URIHandler uriHandler = this.uriHandler;
 		                if (!uriHandler$set) uriHandler = LoadArguments.$default$uriHandler();
-		                Optional<ResourceSet> resourceSet = this.resourceSet;
+		                ResourceSet resourceSet = this.resourceSet;
 		                if (!resourceSet$set) resourceSet = LoadArguments.$default$resourceSet();
-		                Optional<String> version = this.version;
+		                String version = this.version;
 		                if (!version$set) version = LoadArguments.$default$version();
-		                Optional<String> checksum = this.checksum;
+		                String checksum = this.checksum;
 		                if (!checksum$set) checksum = LoadArguments.$default$checksum();
-		                Optional<String> acceptedMetaVersionRange = this.acceptedMetaVersionRange;
-		                if (!acceptedMetaVersionRange$set) acceptedMetaVersionRange = LoadArguments.$default$acceptedMetaVersionRange();
-		                Optional<Map<Object, Object>> loadOptions = this.loadOptions;
+		                String acceptedMetaVersionRange = this.acceptedMetaVersionRange;
+		                if (!acceptedMetaVersionRange$set)
+		                    acceptedMetaVersionRange = LoadArguments.$default$acceptedMetaVersionRange();
+		                Map<Object, Object> loadOptions = this.loadOptions;
 		                if (!loadOptions$set) loadOptions = LoadArguments.$default$loadOptions();
-		                Optional<File> file = this.file;
+		                File file = this.file;
 		                if (!file$set) file = LoadArguments.$default$file();
-		                Optional<InputStream> inputStream = this.inputStream;
+		                InputStream inputStream = this.inputStream;
 		                if (!inputStream$set) inputStream = LoadArguments.$default$inputStream();
-
-		                return new LoadArguments(uri, name, «modelName.decapitalize»ModelResourceSupport, rootUri, uriHandler, 
-		                		resourceSet, version, checksum, acceptedMetaVersionRange, loadOptions, validateModel, file, inputStream);
+		
+		                return new LoadArguments(uri, name, uriHandler, resourceSet, version,
+		                        checksum, acceptedMetaVersionRange, loadOptions, validateModel, file, inputStream);
 		            }
 		
 		            @java.lang.Override
-		            @java.lang.SuppressWarnings("all")
+		            
 		            public java.lang.String toString() {
-		                return "«modelName»Model.LoadArguments.LoadArgumentsBuilder(uri=" + this.uri 
-		                	+ ", name=" + this.name 
-		                	+ ", «modelName.decapitalize»ModelResourceSupport=" + this.«modelName.decapitalize»ModelResourceSupport 
-		                	+ ", rootUri=" + this.rootUri 
-		                	+ ", uriHandler=" + this.uriHandler 
-		                	+ ", resourceSet=" + this.resourceSet 
-		                	+ ", version=" + this.version 
-		                	+ ", checksum=" + this.checksum 
-		                	+ ", acceptedMetaVersionRange=" + this.acceptedMetaVersionRange 
-		                	+ ", loadOptions=" + this.loadOptions 
-		                	+ ", validateModel=" + this.validateModel 
-					        + ", file=" + this.file
-					        + ", inputStream=" + this.inputStream
-		                	+ ")";
+		                return "«modelName»Model.LoadArguments.LoadArgumentsBuilder(uri=" + this.uri
+		                        + ", name=" + this.name
+		                        + ", uriHandler=" + this.uriHandler
+		                        + ", resourceSet=" + this.resourceSet
+		                        + ", version=" + this.version
+		                        + ", checksum=" + this.checksum
+		                        + ", acceptedMetaVersionRange=" + this.acceptedMetaVersionRange
+		                        + ", loadOptions=" + this.loadOptions
+		                        + ", validateModel=" + this.validateModel
+		                        + ", file=" + this.file
+		                        + ", inputStream=" + this.inputStream
+		                        + ")";
 		            }
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
+		        
 		        public static LoadArgumentsBuilder «modelName.decapitalize»LoadArgumentsBuilder() {
 		            return new LoadArgumentsBuilder();
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
-		        private LoadArguments(final URI uri, 
-				        	final String name, 
-				        	final Optional<«modelName»ModelResourceSupport> «modelName.decapitalize»ModelResourceSupport, 
-				        	final Optional<URI> rootUri, 
-				        	final Optional<URIHandler> uriHandler, 
-				        	final Optional<ResourceSet> resourceSet, 
-				        	final Optional<String> version, 
-				        	final Optional<String> checksum, 
-				        	final Optional<String> acceptedMetaVersionRange, 
-				        	final Optional<Map<Object, Object>> loadOptions,
-							final boolean validateModel,
-							final Optional<File> file,
-							final Optional<InputStream> inputStream) {
+		        
+		        private LoadArguments(final URI uri,
+		                              final String name,
+		                              final URIHandler uriHandler,
+		                              final ResourceSet resourceSet,
+		                              final String version,
+		                              final String checksum,
+		                              final String acceptedMetaVersionRange,
+		                              final Map<Object, Object> loadOptions,
+		                              final boolean validateModel,
+		                              final File file,
+		                              final InputStream inputStream) {
 		            this.uri = uri;
 		            this.name = name;
-		            this.«modelName.decapitalize»ModelResourceSupport = «modelName.decapitalize»ModelResourceSupport;
-		            this.rootUri = rootUri;
 		            this.uriHandler = uriHandler;
 		            this.resourceSet = resourceSet;
 		            this.version = version;
@@ -705,9 +661,29 @@ class RuntimeModel implements IGenerator {
 		            this.acceptedMetaVersionRange = acceptedMetaVersionRange;
 		            this.loadOptions = loadOptions;
 		            this.validateModel = validateModel;
-			        this.file = file;
-			        this.inputStream = inputStream;
+		            this.file = file;
+		            this.inputStream = inputStream;
 		        }
+		
+		        
+		        «modelName»ModelResourceSupport.LoadArguments.LoadArgumentsBuilder
+		                    to«modelName»ModelResourceSupportLoadArgumentsBuilder() {
+		            «modelName»ModelResourceSupport.LoadArguments.LoadArgumentsBuilder argumentsBuilder =
+		                    «modelName»ModelResourceSupport.LoadArguments.«modelName.decapitalize»LoadArgumentsBuilder()
+		                            .uri(getUri()
+		                                    .orElseThrow(() -> new IllegalArgumentException("rootURI or URI is mandatory")))
+		                            .validateModel(isValidateModel());
+		
+		            getUriHandler().ifPresent(argumentsBuilder::uriHandler);
+		            getResourceSet().ifPresent(argumentsBuilder::resourceSet);
+		            getLoadOptions().ifPresent(argumentsBuilder::loadOptions);
+		            getFile().ifPresent(argumentsBuilder::file);
+		            getInputStream().ifPresent(argumentsBuilder::inputStream);
+		
+		            return argumentsBuilder;
+		        }
+		
+		
 		    }
 		
 		
@@ -716,77 +692,102 @@ class RuntimeModel implements IGenerator {
 		     * It can handle variance of the presented arguments.
 		     */
 		    public static class SaveArguments {
-		        Optional<OutputStream> outputStream;
-		        Optional<File> file;
-		        Optional<Map<Object, Object>> saveOptions;
-		        boolean validateModel = true;
+		        OutputStream outputStream;
+		        File file;
+		        Map<Object, Object> saveOptions;
+		        boolean validateModel;
 		
-		        @java.lang.SuppressWarnings("all")
-		        private static Optional<OutputStream> $default$outputStream() {
-		            return Optional.empty();
+		        private static OutputStream $default$outputStream() {
+		            return null;
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
-		        private static Optional<File> $default$file() {
-		            return Optional.empty();
+		        private static File $default$file() {
+		            return null;
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
-		        private static Optional<Map<Object, Object>> $default$saveOptions() {
-		            return Optional.empty();
+		        private static Map<Object, Object> $default$saveOptions() {
+		            return null;
 		        }
 		
+		        public Optional<OutputStream> getOutputStream() {
+		            return ofNullable(outputStream);
+		        }
 		
-		        @java.lang.SuppressWarnings("all")
+		        public Optional<File> getFile() {
+		            return ofNullable(file);
+		        }
+		
+		        public Optional<Map<Object, Object>> getSaveOptions() {
+		            return ofNullable(saveOptions);
+		        }
+		
+		        public boolean isValidateModel() {
+		            return validateModel;
+		        }
+		
 		        /**
 		         * Builder for {@link «modelName»Model#save«modelName»Model(SaveArguments)}.
 		         */
 		        public static class SaveArgumentsBuilder {
-		            @java.lang.SuppressWarnings("all")
-		            private boolean outputStream$set;
-		            @java.lang.SuppressWarnings("all")
-		            private Optional<OutputStream> outputStream;
-		            @java.lang.SuppressWarnings("all")
-		            private boolean file$set;
-		            @java.lang.SuppressWarnings("all")
-		            private Optional<File> file;
-		            @java.lang.SuppressWarnings("all")
-		            private boolean saveOptions$set;
-		            @java.lang.SuppressWarnings("all")
-		            private Optional<Map<Object, Object>> saveOptions;
 		            
+		            private boolean outputStream$set;
+		            private OutputStream outputStream;
+		            
+		            private boolean file$set;
+		            private File file;
+		            
+		            private boolean saveOptions$set;
+		            private Map<Object, Object> saveOptions;
+		
 		            private boolean validateModel = true;
 		
-		            @java.lang.SuppressWarnings("all")
+		            
 		            SaveArgumentsBuilder() {
 		            }
 		
-		            @java.lang.SuppressWarnings("all")
+		            
+		            public «modelName»ModelResourceSupport.SaveArguments.SaveArgumentsBuilder
+		                        to«modelName»ModelResourceSupportSaveArgumentsBuilder() {
+		                «modelName»ModelResourceSupport.SaveArguments.SaveArgumentsBuilder argumentsBuilder =
+		                        «modelName»ModelResourceSupport.SaveArguments.«modelName.decapitalize»SaveArgumentsBuilder().validateModel(validateModel);
+		
+		                if (outputStream$set) argumentsBuilder.outputStream(outputStream);
+		                if (file$set) argumentsBuilder.file(file);
+		                if (saveOptions$set) argumentsBuilder.saveOptions(saveOptions);
+		                return argumentsBuilder;
+		            }
+		
+		            
 		            /**
 		             * Defines {@link OutputStream} which is used by save. Whe it is not defined, file is used.
 		             */
 		            public SaveArgumentsBuilder outputStream(final OutputStream outputStream) {
-		                this.outputStream = Optional.of(outputStream);
+		                requireNonNull(outputStream);
+		                this.outputStream = outputStream;
 		                outputStream$set = true;
 		                return this;
 		            }
 		
-		            @java.lang.SuppressWarnings("all")
+		            
 		            /**
-		             * Defines {@link File} which is used by save. Whe it is not defined the model's {@link «modelName»Model#uri is used}
+		             * Defines {@link File} which is used by save. Whe it is not defined the model's
+		             * {@link «modelName»Model#uri is used}
 		             */
 		            public SaveArgumentsBuilder file(File file) {
-		                this.file = Optional.of(file);
+		                requireNonNull(file);
+		                this.file = file;
 		                file$set = true;
 		                return this;
 		            }
 		
-		            @java.lang.SuppressWarnings("all")
+		            
 		            /**
-		             * Defines save options. When it is not defined {@link «modelName»ModelResourceSupport#get«modelName»ModelDefaultSaveOptions()} is used.
+		             * Defines save options. When it is not defined
+		             * {@link «modelName»ModelResourceSupport#get«modelName»ModelDefaultSaveOptions()} is used.
 		             */
 		            public SaveArgumentsBuilder saveOptions(final Map<Object, Object> saveOptions) {
-		                this.saveOptions = Optional.of(saveOptions);
+		                requireNonNull(saveOptions);
+		                this.saveOptions = saveOptions;
 		                saveOptions$set = true;
 		                return this;
 		            }
@@ -799,34 +800,50 @@ class RuntimeModel implements IGenerator {
 		                return this;
 		            }
 		
-		            @java.lang.SuppressWarnings("all")
+		            
 		            public SaveArguments build() {
-		                Optional<OutputStream> outputStream = this.outputStream;
+		                OutputStream outputStream = this.outputStream;
 		                if (!outputStream$set) outputStream = SaveArguments.$default$outputStream();
-		                Optional<File> file = this.file;
+		                File file = this.file;
 		                if (!file$set) file = SaveArguments.$default$file();
-		                Optional<Map<Object, Object>> saveOptions = this.saveOptions;
+		                Map<Object, Object> saveOptions = this.saveOptions;
 		                if (!saveOptions$set) saveOptions = SaveArguments.$default$saveOptions();
 		                return new SaveArguments(outputStream, file, saveOptions, validateModel);
 		            }
 		
 		            @java.lang.Override
-		            @java.lang.SuppressWarnings("all")
+		            
 		            public java.lang.String toString() {
-		                return "«modelName»Model.SaveArguments.SaveArgumentsBuilder(outputStream=" + this.outputStream + ", file=" + this.file + ", saveOptions=" + this.saveOptions + ")";
+		                return "«modelName»Model.SaveArguments.SaveArgumentsBuilder("
+		                        + "outputStream=" + this.outputStream
+		                        + ", file=" + this.file
+		                        + ", saveOptions=" + this.saveOptions
+		                        + ")";
 		            }
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
+		        
 		        public static SaveArgumentsBuilder «modelName.decapitalize»SaveArgumentsBuilder() {
 		            return new SaveArgumentsBuilder();
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
-		        private SaveArguments(final Optional<OutputStream> outputStream, 
-		        						final Optional<File> file, 
-		        						final Optional<Map<Object, Object>> saveOptions,
-		        						final boolean validateModel) {
+		        
+		        public «modelName»ModelResourceSupport.SaveArguments.SaveArgumentsBuilder to«modelName»ModelResourceSupportSaveArgumentsBuilder() {
+		            «modelName»ModelResourceSupport.SaveArguments.SaveArgumentsBuilder argumentsBuilder =
+		                    «modelName»ModelResourceSupport.SaveArguments.«modelName.decapitalize»SaveArgumentsBuilder().validateModel(validateModel);
+		
+		            getOutputStream().ifPresent(o -> argumentsBuilder.outputStream(o));
+		            getFile().ifPresent(o -> argumentsBuilder.file(o));
+		            getSaveOptions().ifPresent(o -> argumentsBuilder.saveOptions(o));
+		            return argumentsBuilder;
+		        }
+		
+		
+		        
+		        private SaveArguments(final OutputStream outputStream,
+		                              final File file,
+		                              final Map<Object, Object> saveOptions,
+		                              final boolean validateModel) {
 		            this.outputStream = outputStream;
 		            this.file = file;
 		            this.saveOptions = saveOptions;
@@ -835,37 +852,35 @@ class RuntimeModel implements IGenerator {
 		    }
 		
 		
-		    @java.lang.SuppressWarnings("all")
+		    
 		    public static class «modelName»ModelBuilder {
-		        @java.lang.SuppressWarnings("all")
+		        
 		        private String name;
-		        @java.lang.SuppressWarnings("all")
 		        private URI uri;
 		
-		        @java.lang.SuppressWarnings("all")
 		        private boolean version$set;
-		        @java.lang.SuppressWarnings("all")
-		        private Optional<String> version;
-		        @java.lang.SuppressWarnings("all")
+		        private String version;
+		
 		        private boolean checksum$set;
-		        @java.lang.SuppressWarnings("all")
-		        private Optional<String> checksum;
+		        private String checksum;
 		
-		        @java.lang.SuppressWarnings("all")
 		        private boolean metaVersionRange$set;
-		        @java.lang.SuppressWarnings("all")
-		        private Optional<String> metaVersionRange;
+		        private String metaVersionRange;
 		
-		        @java.lang.SuppressWarnings("all")
 		        private boolean «modelName.decapitalize»ModelResourceSupport$set;
-		        @java.lang.SuppressWarnings("all")
-		        private Optional<«modelName»ModelResourceSupport> «modelName.decapitalize»ModelResourceSupport;
+		        private «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport;
 		
-		        @java.lang.SuppressWarnings("all")
+		        private boolean resourceSet$set;
+		        private ResourceSet resourceSet;
+		
+		        private URIHandler uriHandler;
+		        private boolean uriHandler$set;
+		
+		
 		        «modelName»ModelBuilder() {
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
+		        
 		        /**
 		         * Defines name of the model. Its mandatory.
 		         */
@@ -874,7 +889,7 @@ class RuntimeModel implements IGenerator {
 		            return this;
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
+		        
 		        /**
 		         * Defines the uri {@link URI} of the model. Its mandatory.
 		         */
@@ -883,125 +898,131 @@ class RuntimeModel implements IGenerator {
 		            return this;
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
+		        
 		        /**
 		         * Defines the version of the model. Its mandatory.
 		         */
 		        public «modelName»ModelBuilder version(final String version) {
-		            this.version = Optional.of(version);
+		            requireNonNull(version);
+		            this.version = version;
 		            version$set = true;
 		            return this;
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
+		        
 		        /**
 		         * Defines the checksum of the model. Its mandatory.
 		         */
 		        public «modelName»ModelBuilder checksum(final String checksum) {
-		            this.checksum = Optional.of(checksum);
+		            requireNonNull(checksum);
+		            this.checksum = checksum;
 		            this.checksum$set = true;
 		            return this;
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
+		        
 		        /**
 		         * Defines the version of the model.
 		         */
 		        public «modelName»ModelBuilder metaVersionRange(final String metaVersionRange) {
-		            this.metaVersionRange = Optional.of(metaVersionRange);
+		            requireNonNull(metaVersionRange);
+		            this.metaVersionRange = metaVersionRange;
 		            this.metaVersionRange$set = true;
 		            return this;
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
+		        
 		        public «modelName»ModelBuilder «modelName.decapitalize»ModelResourceSupport(final «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport) {
-		            this.«modelName.decapitalize»ModelResourceSupport = Optional.of(«modelName.decapitalize»ModelResourceSupport);
+		            requireNonNull(«modelName.decapitalize»ModelResourceSupport);
+		            this.«modelName.decapitalize»ModelResourceSupport = «modelName.decapitalize»ModelResourceSupport;
 		            this.«modelName.decapitalize»ModelResourceSupport$set = true;
 		            return this;
 		        }
 		
-		        @java.lang.SuppressWarnings("all")
+		        public «modelName»ModelBuilder resourceSet(final ResourceSet resourceSet) {
+		            requireNonNull(resourceSet);
+		            this.resourceSet = resourceSet;
+		            this.resourceSet$set = true;
+		            return this;
+		        }
+		
+		        public «modelName»ModelBuilder uriHandler(final URIHandler uriHandler) {
+		            requireNonNull(uriHandler);
+		            this.uriHandler = uriHandler;
+		            this.uriHandler$set = true;
+		            return this;
+		        }
+		
+		
 		        public «modelName»Model build() {
 		
-		            Optional<«modelName»ModelResourceSupport> «modelName.decapitalize»ModelResourceSupport = this.«modelName.decapitalize»ModelResourceSupport;
-		            if (!«modelName.decapitalize»ModelResourceSupport$set) «modelName.decapitalize»ModelResourceSupport = LoadArguments.$default$«modelName.decapitalize»ModelResourceSupport();
-		            Optional<String> version = this.version;
+		            «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport = this.«modelName.decapitalize»ModelResourceSupport;
+		            if (!«modelName.decapitalize»ModelResourceSupport$set) {
+		                «modelName»ModelResourceSupport.«modelName»ModelResourceSupportBuilder «modelName.decapitalize»ModelResourceSupportBuilder =
+		                        «modelName»ModelResourceSupport.«modelName.decapitalize»ModelResourceSupportBuilder()
+		                                .uri(uri);
+		
+		                if (resourceSet$set) «modelName.decapitalize»ModelResourceSupportBuilder.resourceSet(resourceSet);
+		                if (uriHandler$set) «modelName.decapitalize»ModelResourceSupportBuilder.uriHandler(uriHandler);
+		
+		                «modelName.decapitalize»ModelResourceSupport = «modelName.decapitalize»ModelResourceSupportBuilder.build();
+		            } else {
+		                this.uri = «modelName.decapitalize»ModelResourceSupport.getResource().getURI();
+		            }
+		
+		            String version = this.version;
 		            if (!version$set) version = LoadArguments.$default$version();
-		            Optional<String> checksum = this.checksum;
+		            String checksum = this.checksum;
 		            if (!checksum$set) checksum = LoadArguments.$default$checksum();
-		            Optional<String> metaVersionRange = this.metaVersionRange;
+		            String metaVersionRange = this.metaVersionRange;
 		            if (!metaVersionRange$set) metaVersionRange = LoadArguments.$default$acceptedMetaVersionRange();
 		
 		            return new «modelName»Model(name, version, uri, checksum, metaVersionRange, «modelName.decapitalize»ModelResourceSupport);
 		        }
 		
 		        @java.lang.Override
-		        @java.lang.SuppressWarnings("all")
 		        public java.lang.String toString() {
-		            return "«modelName»Model.«modelName»ModelBuilder(name=" + this.name 
-		            	+ ", version=" + this.version 
-		            	+ ", uri=" + this.uri 
-		            	+ ", checksum=" + this.checksum 
-		            	+ ", metaVersionRange=" + this.metaVersionRange 
-		            	+ ", «modelName.decapitalize»ModelResourceSupport=" + this.«modelName.decapitalize»ModelResourceSupport + ")";
+		            return "«modelName»Model.«modelName»ModelBuilder(name=" + this.name
+		                    + ", version=" + this.version
+		                    + ", uri=" + this.uri
+		                    + ", checksum=" + this.checksum
+		                    + ", metaVersionRange=" + this.metaVersionRange
+		                    + ", «modelName.decapitalize»ModelResourceSupport=" + this.«modelName.decapitalize»ModelResourceSupport + ")";
 		        }
 		    }
 		
-		    @java.lang.SuppressWarnings("all")
 		    public static «modelName»ModelBuilder build«modelName»Model() {
 		        return new «modelName»ModelBuilder();
 		    }
 		
+		    private «modelName»Model(final String name,
+		                     final String version,
+		                     final URI uri,
+		                     final String checksum,
+		                     final String metaVersionRange,
+		                     final «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport) {
 		
-		    @java.lang.SuppressWarnings("all")
-		    private static Optional<«modelName»ModelResourceSupport> $default$«modelName.decapitalize»ModelResourceSupport() {
-		        return Optional.empty();
-		    }
+		        requireNonNull(name, "Name is mandatory");
+		        requireNonNull(name, "URI is mandatory");
 		
-		    @java.lang.SuppressWarnings("all")
-		    private static Optional<String> $default$version() {
-		        return Optional.empty();
-		    }
-		
-		    @java.lang.SuppressWarnings("all")
-		    private static Optional<String> $default$checksum() {
-		        return Optional.empty();
-		    }
-		
-		    @java.lang.SuppressWarnings("all")
-		    private static Optional<String> $default$metaVersionRange() {
-		        return Optional.empty();
-		    }
-		
-		    @java.lang.SuppressWarnings("all")
-		    private «modelName»Model(final String name, 
-		    			final Optional<String> version, 
-		    			final URI uri, 
-		    			final Optional<String> checksum, 
-		    			final Optional<String> metaVersionRange, 
-		    			final Optional<«modelName»ModelResourceSupport> «modelName.decapitalize»ModelResourceSupport) {
 		        this.name = name;
-		        this.version = version.orElse("1.0.0");
+		        this.version = version;
 		        this.uri = uri;
-		        this.checksum = checksum.orElse("notused");
-		        this.metaVersionRange = metaVersionRange.orElse("[1.0,2)");
-		        this.«modelName.decapitalize»ModelResourceSupport = «modelName.decapitalize»ModelResourceSupport
-		        	.orElseGet(() -> «modelName»ModelResourceSupport.«modelName.decapitalize»ModelResourceSupportBuilder()
-		        			.resourceSet(«modelName»ModelResourceSupport.create«modelName»ResourceSet()).build());
+		        this.checksum = checksum;
+		        this.metaVersionRange = metaVersionRange;
+		        this.«modelName.decapitalize»ModelResourceSupport = «modelName.decapitalize»ModelResourceSupport;
 		    }
 		
 		    @java.lang.Override
-		    @java.lang.SuppressWarnings("all")
 		    public java.lang.String toString() {
-		        return "«modelName»Model(name=" + this.getName() 
-			        + ", version=" + this.getVersion() 
-			        + ", uri=" + this.getUri() 
-			        + ", checksum=" + this.getChecksum() 
-			        + ", metaVersionRange=" + this.getMetaVersionRange() 
-			        + ", «modelName.decapitalize»ModelResourceSupport=" + this.get«modelName»ModelResourceSupport() + ")";
+		        return "«modelName»Model(name=" + this.getName()
+		                + ", version=" + this.getVersion()
+		                + ", uri=" + this.getUri()
+		                + ", checksum=" + this.getChecksum()
+		                + ", metaVersionRange=" + this.getMetaVersionRange()
+		                + ", «modelName.decapitalize»ModelResourceSupport=" + this.«modelName.decapitalize»ModelResourceSupport + ")";
 		    }
 		
-		    @java.lang.SuppressWarnings("all")
 		    /**
 		     * Get the name of the model.
 		     */
@@ -1009,7 +1030,6 @@ class RuntimeModel implements IGenerator {
 		        return this.name;
 		    }
 		
-		    @java.lang.SuppressWarnings("all")
 		    /**
 		     * Get the model version.
 		     */
@@ -1017,7 +1037,6 @@ class RuntimeModel implements IGenerator {
 		        return this.version;
 		    }
 		
-		    @java.lang.SuppressWarnings("all")
 		    /**
 		     * Get the {@link URI} of the model.
 		     */
@@ -1025,7 +1044,6 @@ class RuntimeModel implements IGenerator {
 		        return this.uri;
 		    }
 		
-		    @java.lang.SuppressWarnings("all")
 		    /**
 		     * Get the checksum of the model.
 		     */
@@ -1033,56 +1051,13 @@ class RuntimeModel implements IGenerator {
 		        return this.checksum;
 		    }
 		
-		    @java.lang.SuppressWarnings("all")
 		    /**
 		     * Get the accepted range of meta model version.
 		     */
 		    public String getMetaVersionRange() {
 		        return this.metaVersionRange;
 		    }
-		
-		    @java.lang.SuppressWarnings("all")
-		    /**
-		     * Get the {@link «modelName»ModelResourceSupport} instance related this instance.
-		     */
-		    public «modelName»ModelResourceSupport get«modelName»ModelResourceSupport() {
-		        return this.«modelName.decapitalize»ModelResourceSupport;
-		    }
-		    
-		    // TODO: Create ticket on Eclipse. The proble is that the DelegatingResourceLocator
-		    // creating a baseURL which ends with two trailing slash and the ResourceBundle cannot open the files.
-			// Ugly hack: The EcorePlugin baseUri has an extra trailing slash
-			// on OSGi, so we try to fix it
-			private static void fixEcoreUri() {
-			    try {
-			        URL baseUrl = EcorePlugin.INSTANCE.getBaseURL();
-			        if (baseUrl.toString().startsWith("bundle:") && baseUrl.toString().endsWith("//")) {
-			            URL fixedUrl = new URL(baseUrl.toString().substring(0, baseUrl.toString().length() - 1));
-			            Field myField = getField(DelegatingResourceLocator.class, "baseURL");
-			            myField.setAccessible(true);
-			            myField.set(EcorePlugin.INSTANCE, fixedUrl);
-			        }
-			    } catch (Throwable t) {
-			        t.printStackTrace(System.out);
-			    }
-			
-			}
-			
-			private static Field getField(Class clazz, String fieldName)
-			        throws NoSuchFieldException {
-			    try {
-			        return clazz.getDeclaredField(fieldName);
-			    } catch (NoSuchFieldException e) {
-			        Class superClass = clazz.getSuperclass();
-			        if (superClass == null) {
-			            throw e;
-			        } else {
-			            return getField(superClass, fieldName);
-			        }
-			    }
-			}
-			    
-		    
+
 		}
 	'''
 }
