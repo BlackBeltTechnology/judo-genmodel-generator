@@ -1,23 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
         <groupId>hu.blackbelt.judo</groupId>
         <artifactId>hu.blackbelt.judo.eclipse.emf.genmodel.generator</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
-	</parent>
-	<artifactId>hu.blackbelt.judo.eclipse.emf.genmodel.generator.site</artifactId>
-	<packaging>eclipse-repository</packaging>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>hu.blackbelt.judo.eclipse.emf.genmodel.generator.targetdefinition</artifactId>
+    <packaging>eclipse-target-definition</packaging>
 
     <profiles>
         <profile>
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
-            <id>update-category-versions</id>
+            <id>update-target-versions</id>
             <build>
                 <plugins>
                     <plugin>
@@ -33,12 +31,16 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <file>${project.basedir}/category.xml</file>
+                            <file>${project.basedir}/${project.artifactId}.target</file>
                             <replacements>
-                                <!-- EMF Genmodel Generator -->
+                                <!-- EMF Genmodel generator version -->
                                 <replacement>
-                                    <token>(repository-reference\ location\=\")(.*?)(emf-genmodel-generator\/)(.*?)(\")</token>
-                                    <value>repository-reference location="$2$3${emf-genmodel-generator-version}"</value>
+                                    <token>(hu.blackbelt.eclipse.emf.genmodel.generator.feature.feature.group\"\ version\=\")(.*)(\"\/&gt;)</token>
+                                    <value>$1${emf-genmodel-generator-version}"/&gt;</value>
+                                </replacement>
+                                <replacement>
+                                    <token>(emf-genmodel-generator\/)(.*)(\"\/&gt;)</token>
+                                    <value>$1${emf-genmodel-generator-version}"/&gt;</value>
                                 </replacement>
                             </replacements>
                             <regex>true</regex>
@@ -84,31 +86,6 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.jboss.tools.tycho-plugins</groupId>
-                <artifactId>repository-utils</artifactId>
-                <version>${tycho-version}</version>
-                <executions>
-                    <execution>
-                        <id>generate-facade</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>generate-repository-facade</goal>
-                        </goals>
-                        <configuration>
-                            <symbols>
-                                <update.site.name>${project.description} Update site</update.site.name>
-                                <update.site.description>Use this URL in Eclipse to install</update.site.description>
-                            </symbols>
-                            <associateSites>
-                                <site>https://nexus.blackbelt.cloud/repository/p2-judo/emf-genmodel-generator/${emf-genmodel-generator-version}/</site>
-                            </associateSites>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
 
 </project>

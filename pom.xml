@@ -37,10 +37,9 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <eclipse-p2-base>http://download.eclipse.org/releases/2018-12</eclipse-p2-base>
 
         <!-- Xtend / Xcore -->
-        <emf-genmodel-generator-version>1.0.0.develop_00017</emf-genmodel-generator-version>
+        <emf-genmodel-generator-version>1.0.0.develop_00018</emf-genmodel-generator-version>
         <core-resources-version>3.12.0</core-resources-version>
         <eclipse-text-version>3.5.101</eclipse-text-version>
         <emf-version>2.15.0</emf-version>
@@ -57,13 +56,6 @@
 
     </properties>
     
-    <repositories>
-        <repository>
-            <id>eclipse</id>
-            <layout>p2</layout>
-            <url>${eclipse-p2-base}</url>
-        </repository>
-    </repositories>
     <developers>
         <developer>
             <id>robson</id>
@@ -138,7 +130,13 @@
                 <artifactId>target-platform-configuration</artifactId>
                 <version>${tycho-version}</version>
                 <configuration>
-                    <pomDependencies>consider</pomDependencies>
+                    <target>
+                        <artifact>
+                            <groupId>hu.blackbelt.judo</groupId>
+                            <artifactId>hu.blackbelt.judo.eclipse.emf.genmodel.generator.targetdefinition</artifactId>
+                            <version>${project.version}</version>
+                        </artifact>
+                    </target>
                     <environments>
                         <environment>
                             <os>linux</os>
@@ -188,6 +186,11 @@
                     </execution>
                 </executions>
             </plugin>
+
+   			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-source-feature-plugin</artifactId>
+			</plugin>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -223,6 +226,52 @@
                         </execution>
                     </executions>
                 </plugin>
+
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-source-plugin</artifactId>
+					<version>${tycho-version}</version>
+
+					<executions>
+						<execution>
+							<id>plugin-source</id>
+							<goals>
+								<goal>plugin-source</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<groupId>org.eclipse.tycho.extras</groupId>
+					<artifactId>tycho-source-feature-plugin</artifactId>
+					<version>${tycho-version}</version>
+					<executions>
+						<execution>
+							<id>source-feature</id>
+							<phase>package</phase>
+							<goals>
+								<goal>source-feature</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-p2-plugin</artifactId>
+					<version>${tycho-version}</version>
+					<executions>
+						<execution>
+							<id>attach-p2-metadata</id>
+							<phase>package</phase>
+							<goals>
+								<goal>p2-metadata</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
@@ -506,7 +555,8 @@
                 </property>
             </activation>
 		    <modules>
-		        <module>runtimemodel</module>
+                <module>targetdefinition</module>
+                <module>runtimemodel</module>
 		        <module>feature</module>
 		        <module>site</module>
 		    </modules>

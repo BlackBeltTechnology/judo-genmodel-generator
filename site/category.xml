@@ -1,7 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
    <feature id="hu.blackbelt.judo.eclipse.emf.genmodel.generator.feature" version="1.0.0.qualifier">
-      <category name="hu.blackbelt.judo.eclipse.emf.genmodel.generator.runtimemodel"/>
+      <category name="judo_genmodel_generator"/>
    </feature>
-    <category-def name="hu.blackbelt.judo.eclipse.emf.genmodel.generator.runtimemodel" label="Judo GenModel Runtime Model Generator"/>
+   <category-def name="judo_genmodel_generator" label="Judo GenModel Generator">
+      <description>
+         Judo GenModel Generator
+      </description>
+   </category-def>
+    
+
+   <feature id="hu.blackbelt.judo.eclipse.emf.genmodel.generator.feature.source">
+      <category name="judo_genmodel_generator_source"/>
+   </feature>
+   
+   <category-def name="judo_genmodel_generator_source" label="Judo GenModel Generator Source">
+      <description>
+         Judo GenModel Generator source code.
+      </description>
+   </category-def>
+   
+   <!-- This is currently ignored by Tycho, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=453708 -->
+   <!-- The tycho plugin 1.5.0 will fix it -->
+   <repository-reference location="https://nexus.blackbelt.cloud/repository/p2-judo/emf-genmodel-generator/1.0.0.develop_00018" enabled="true" />
+   
 </site>
