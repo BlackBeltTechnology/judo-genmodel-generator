@@ -30,6 +30,7 @@ class RuntimeModel implements IGenerator {
 		import «packageName».support.«modelName»ModelResourceSupport;
 		
 		import java.io.*;
+		import java.util.Collections;
 		import java.util.Dictionary;
 		import java.util.Hashtable;
 		import java.util.Map;
@@ -89,6 +90,7 @@ class RuntimeModel implements IGenerator {
 		    public static final String META_VERSION_RANGE = "meta-version-range";
 		    public static final String URI = "uri";
 		    public static final String RESOURCESET = "resourceset";
+		    public static final String TAGS = "tags";
 		
 		    private String name;
 		    private String version;
@@ -96,6 +98,7 @@ class RuntimeModel implements IGenerator {
 		    private String checksum;
 		    private String metaVersionRange;
 		    private «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport;
+		    private Set<String> tags;
 		
 		    /**
 		     * Return all properties as a {@link Dictionary}
@@ -109,6 +112,7 @@ class RuntimeModel implements IGenerator {
 		        ret.put(CHECKSUM, checksum);
 		        ret.put(META_VERSION_RANGE, metaVersionRange);
 		        ret.put(RESOURCESET, «modelName.decapitalize»ModelResourceSupport.getResourceSet());
+		        ret.put(TAGS, tags);
 		        return ret;
 		    }
 		
@@ -239,6 +243,8 @@ class RuntimeModel implements IGenerator {
 		                            .orElseThrow(() -> new IllegalArgumentException("URI is mandatory")))
 		                    .checksum(loadArguments.getChecksum()
 		                            .orElse("NON-DEFINED"))
+		                    .tags(loadArguments.getTags()
+		                            .orElse(Collections.emptySet()))
 		                    .«modelName.decapitalize»ModelResourceSupport(«modelName.decapitalize»ModelResourceSupport)
 		                    .metaVersionRange(loadArguments.getAcceptedMetaVersionRange()
 		                            .orElse("[0,9999)"))
@@ -360,6 +366,7 @@ class RuntimeModel implements IGenerator {
 		        boolean validateModel;
 		        InputStream inputStream;
 		        File file;
+		        Set<String> tags;
 		
 		        private static URIHandler $default$uriHandler() {
 		            return null;
@@ -387,6 +394,10 @@ class RuntimeModel implements IGenerator {
 		
 		        private static InputStream $default$inputStream() {
 		            return null;
+		        }
+
+		        private static Set<String> $default$tags() {
+		            return  Collections.emptySet();
 		        }
 		
 		        private static Map<Object, Object> $default$loadOptions() {
@@ -419,6 +430,10 @@ class RuntimeModel implements IGenerator {
 		
 		        Optional<String> getAcceptedMetaVersionRange() {
 		            return ofNullable(acceptedMetaVersionRange);
+		        }
+
+		        Optional<Set<String>> getTags() {
+		            return ofNullable(tags);
 		        }
 		
 		        Optional<Map<Object, Object>> getLoadOptions() {
@@ -458,6 +473,9 @@ class RuntimeModel implements IGenerator {
 		            
 		            private boolean acceptedMetaVersionRange$set;
 		            private String acceptedMetaVersionRange;
+
+		            private boolean tags$set;
+		            private Set<String> tags;
 		            
 		            private boolean loadOptions$set;
 		            private Map<Object, Object> loadOptions;
@@ -549,6 +567,16 @@ class RuntimeModel implements IGenerator {
 		                acceptedMetaVersionRange$set = true;
 		                return this;
 		            }
+
+		            /**
+		             * Defines the tags of mdoel.
+		             */
+		            public LoadArgumentsBuilder tags(final Set<String> tags) {
+		                requireNonNull(tags);
+		                this.tags = tags;
+		                tags$set = true;
+		                return this;
+		            }
 		
 		            
 		            /**
@@ -606,6 +634,10 @@ class RuntimeModel implements IGenerator {
 		                String acceptedMetaVersionRange = this.acceptedMetaVersionRange;
 		                if (!acceptedMetaVersionRange$set)
 		                    acceptedMetaVersionRange = LoadArguments.$default$acceptedMetaVersionRange();
+		                Set<String> tags = this.tags;
+		                if (!tags$set)
+		                    tags = LoadArguments.$default$tags();
+
 		                Map<Object, Object> loadOptions = this.loadOptions;
 		                if (!loadOptions$set) loadOptions = LoadArguments.$default$loadOptions();
 		                File file = this.file;
@@ -614,7 +646,7 @@ class RuntimeModel implements IGenerator {
 		                if (!inputStream$set) inputStream = LoadArguments.$default$inputStream();
 		
 		                return new LoadArguments(uri, name, uriHandler, resourceSet, version,
-		                        checksum, acceptedMetaVersionRange, loadOptions, validateModel, file, inputStream);
+		                        checksum, acceptedMetaVersionRange, loadOptions, validateModel, file, inputStream, tags);
 		            }
 		
 		            @java.lang.Override
@@ -631,6 +663,7 @@ class RuntimeModel implements IGenerator {
 		                        + ", validateModel=" + this.validateModel
 		                        + ", file=" + this.file
 		                        + ", inputStream=" + this.inputStream
+		                        + ", tags=" + this.tags
 		                        + ")";
 		            }
 		        }
@@ -651,7 +684,8 @@ class RuntimeModel implements IGenerator {
 		                              final Map<Object, Object> loadOptions,
 		                              final boolean validateModel,
 		                              final File file,
-		                              final InputStream inputStream) {
+		                              final InputStream inputStream,
+		                              final Set<String> tags) {
 		            this.uri = uri;
 		            this.name = name;
 		            this.uriHandler = uriHandler;
@@ -663,6 +697,7 @@ class RuntimeModel implements IGenerator {
 		            this.validateModel = validateModel;
 		            this.file = file;
 		            this.inputStream = inputStream;
+		            this.tags = tags;
 		        }
 		
 		        
@@ -866,6 +901,9 @@ class RuntimeModel implements IGenerator {
 		
 		        private boolean metaVersionRange$set;
 		        private String metaVersionRange;
+
+		        private boolean tags$set;
+		        private Set<String> tags;
 		
 		        private boolean «modelName.decapitalize»ModelResourceSupport$set;
 		        private «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport;
@@ -930,6 +968,16 @@ class RuntimeModel implements IGenerator {
 		            this.metaVersionRange$set = true;
 		            return this;
 		        }
+
+		        /**
+		         * Defines the tags of the model.
+		         */
+		        public «modelName»ModelBuilder tags(final Set<String> tags) {
+		            requireNonNull(tags);
+		            this.tags = tags;
+		            this.tags$set = true;
+		            return this;
+		        }
 		
 		        
 		        public «modelName»ModelBuilder «modelName.decapitalize»ModelResourceSupport(final «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport) {
@@ -976,8 +1024,10 @@ class RuntimeModel implements IGenerator {
 		            if (!checksum$set) checksum = LoadArguments.$default$checksum();
 		            String metaVersionRange = this.metaVersionRange;
 		            if (!metaVersionRange$set) metaVersionRange = LoadArguments.$default$acceptedMetaVersionRange();
+		            Set<String> tags = this.tags;
+		            if (!tags$set) tags = LoadArguments.$default$tags();
 		
-		            return new «modelName»Model(name, version, uri, checksum, metaVersionRange, «modelName.decapitalize»ModelResourceSupport);
+		            return new «modelName»Model(name, version, uri, checksum, metaVersionRange, tags, «modelName.decapitalize»ModelResourceSupport);
 		        }
 		
 		        @java.lang.Override
@@ -1000,6 +1050,7 @@ class RuntimeModel implements IGenerator {
 		                     final URI uri,
 		                     final String checksum,
 		                     final String metaVersionRange,
+		                     final Set<String> tags,
 		                     final «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport) {
 		
 		        requireNonNull(name, "Name is mandatory");
@@ -1010,6 +1061,7 @@ class RuntimeModel implements IGenerator {
 		        this.uri = uri;
 		        this.checksum = checksum;
 		        this.metaVersionRange = metaVersionRange;
+		        this.tags = tags;
 		        this.«modelName.decapitalize»ModelResourceSupport = «modelName.decapitalize»ModelResourceSupport;
 		    }
 		
@@ -1020,6 +1072,7 @@ class RuntimeModel implements IGenerator {
 		                + ", uri=" + this.getUri()
 		                + ", checksum=" + this.getChecksum()
 		                + ", metaVersionRange=" + this.getMetaVersionRange()
+		                + ", tags=" + this.getTags()
 		                + ", «modelName.decapitalize»ModelResourceSupport=" + this.«modelName.decapitalize»ModelResourceSupport + ")";
 		    }
 		
@@ -1056,6 +1109,14 @@ class RuntimeModel implements IGenerator {
 		     */
 		    public String getMetaVersionRange() {
 		        return this.metaVersionRange;
+		    }
+
+		
+		    /**
+		     * Get the tags.
+		     */
+		    public Set<String> getTags() {
+		        return this.tags;
 		    }
 
 		}
