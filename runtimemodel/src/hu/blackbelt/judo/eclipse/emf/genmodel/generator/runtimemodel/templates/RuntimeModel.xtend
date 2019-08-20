@@ -1007,13 +1007,14 @@ class RuntimeModel implements IGenerator {
 		
 		
 		        public «modelName»Model build() {
+		            org.eclipse.emf.common.util.URI uriPhysicalOrLogical = ofNullable(uri)
+		                    .orElseGet(() -> org.eclipse.emf.common.util.URI.createURI(name + "-«modelName.decapitalize».model"));
 		
 		            «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport = this.«modelName.decapitalize»ModelResourceSupport;
 		            if (!«modelName.decapitalize»ModelResourceSupport$set) {
 		                «modelName»ModelResourceSupport.«modelName»ModelResourceSupportBuilder «modelName.decapitalize»ModelResourceSupportBuilder =
 		                        «modelName»ModelResourceSupport.«modelName.decapitalize»ModelResourceSupportBuilder()
-		                                .uri(ofNullable(uri)
-		                                        .orElseGet(() -> org.eclipse.emf.common.util.URI.createURI(name + "-«modelName.decapitalize».model")));
+		                                .uri(uriPhysicalOrLogical);
 		
 		                if (resourceSet$set) «modelName.decapitalize»ModelResourceSupportBuilder.resourceSet(resourceSet);
 		                if (uriHandler$set) «modelName.decapitalize»ModelResourceSupportBuilder.uriHandler(uriHandler);
@@ -1032,7 +1033,7 @@ class RuntimeModel implements IGenerator {
 		            Set<String> tags = this.tags;
 		            if (!tags$set) tags = LoadArguments.$default$tags();
 		
-		            return new «modelName»Model(name, version, uri, checksum, metaVersionRange, tags, «modelName.decapitalize»ModelResourceSupport);
+		            return new «modelName»Model(name, version, uriPhysicalOrLogical, checksum, metaVersionRange, tags, «modelName.decapitalize»ModelResourceSupport);
 		        }
 		
 		        @java.lang.Override
