@@ -240,7 +240,9 @@ class RuntimeModel implements IGenerator {
 		                    .version(loadArguments.getVersion()
 		                            .orElse("1.0.0"))
 		                    .uri(loadArguments.getUri()
-		                            .orElseThrow(() -> new IllegalArgumentException("URI is mandatory")))
+		                            .orElseGet(() ->
+		                                    org.eclipse.emf.common.util.URI.createURI(
+		                                            loadArguments.getName().get() + "-«modelName.decapitalize».model")))
 		                    .checksum(loadArguments.getChecksum()
 		                            .orElse("NON-DEFINED"))
 		                    .tags(loadArguments.getTags()
@@ -706,7 +708,9 @@ class RuntimeModel implements IGenerator {
 		            «modelName»ModelResourceSupport.LoadArguments.LoadArgumentsBuilder argumentsBuilder =
 		                    «modelName»ModelResourceSupport.LoadArguments.«modelName.decapitalize»LoadArgumentsBuilder()
 		                            .uri(getUri()
-		                                    .orElseThrow(() -> new IllegalArgumentException("rootURI or URI is mandatory")))
+		                                    .orElseGet(() ->
+		                                            org.eclipse.emf.common.util.URI.createURI(
+		                                                    getName().get() + "-«modelName.decapitalize».model")))
 		                            .validateModel(isValidateModel());
 		
 		            getUriHandler().ifPresent(argumentsBuilder::uriHandler);
