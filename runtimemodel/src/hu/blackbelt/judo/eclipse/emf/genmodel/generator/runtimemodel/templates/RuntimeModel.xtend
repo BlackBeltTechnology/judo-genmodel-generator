@@ -1012,7 +1012,8 @@ class RuntimeModel implements IGenerator {
 		            if (!«modelName.decapitalize»ModelResourceSupport$set) {
 		                «modelName»ModelResourceSupport.«modelName»ModelResourceSupportBuilder «modelName.decapitalize»ModelResourceSupportBuilder =
 		                        «modelName»ModelResourceSupport.«modelName.decapitalize»ModelResourceSupportBuilder()
-		                                .uri(uri);
+		                                .uri(ofNullable(uri)
+		                                        .orElseGet(() -> org.eclipse.emf.common.util.URI.createURI(name + "-«modelName.decapitalize».model")));
 		
 		                if (resourceSet$set) «modelName.decapitalize»ModelResourceSupportBuilder.resourceSet(resourceSet);
 		                if (uriHandler$set) «modelName.decapitalize»ModelResourceSupportBuilder.uriHandler(uriHandler);
