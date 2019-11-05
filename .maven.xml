@@ -33,10 +33,10 @@
     
     <mirrors>
         <mirror>
-            <id>blackbelt-nexus-mirror</id>
-            <name>blackbelt-nexus-mirror</name>
+            <id>judong-nexus-mirror</id>
+            <name>judong-nexus-mirror</name>
             <url>https://nexus.judo.technology/repository/maven-judong/</url>
-            <mirrorOf>central</mirrorOf>
+            <mirrorOf>*</mirrorOf>
         </mirror>
     </mirrors>
     
