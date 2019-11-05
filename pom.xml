@@ -1,8 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-    xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<?xml version='1.0' encoding='UTF-8'?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>hu.blackbelt.judo</groupId>
     <artifactId>hu.blackbelt.judo.eclipse.emf.genmodel.generator</artifactId>
@@ -39,7 +36,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Xtend / Xcore -->
-        <emf-genmodel-generator-version>1.0.0.develop_00025</emf-genmodel-generator-version>
+        <emf-genmodel-generator-version>1.0.0.20191105_161805_09da63b_develop</emf-genmodel-generator-version>
         <core-resources-version>3.12.0</core-resources-version>
         <eclipse-text-version>3.5.101</eclipse-text-version>
         <emf-version>2.15.0</emf-version>
@@ -304,7 +301,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore></ignore>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -323,7 +320,7 @@
                                 		</goals>
                                 	</pluginExecutionFilter>
                                 	<action>
-                                		<ignore></ignore>
+                                		<ignore />
                                 	</action>
                                 </pluginExecution>
                             </pluginExecutions>
@@ -608,15 +605,15 @@
         </profile>
         
         <profile>
-            <id>release-blackbelt</id>
+            <id>release-judong</id>
             <distributionManagement>
                 <snapshotRepository>
-                    <id>blackbelt-nexus-distribution</id>
-                    <url>https://nexus.blackbelt.cloud/repository/maven-judo-release/</url>
+                    <id>judong-nexus-distribution</id>
+                    <url>${env.JUDONG_MAVEN_UPSTREAM_SNAPSHOT}</url>
                 </snapshotRepository>
                 <repository>
-                    <id>blackbelt-nexus-distribution</id>
-                    <url>https://nexus.blackbelt.cloud/repository/maven-judo-release/</url>
+                    <id>judong-nexus-distribution</id>
+                    <url>${env.JUDONG_MAVEN_UPSTREAM_RELEASE}</url>
                 </repository>
             </distributionManagement>
         </profile>
@@ -716,7 +713,7 @@
         </profile>
         
         <profile>
-            <id>release-p2-blackbelt</id>
+            <id>release-p2-judong</id>
             <build>
                 <plugins>
                     <plugin>
@@ -731,10 +728,10 @@
                                     <goal>upload</goal>
                                 </goals>
                                 <configuration>
-                                    <serverId>blackbelt-nexus-distribution</serverId>
+                                    <serverId>judong-nexus-distribution</serverId>
                                     <fromDir>${basedir}/site/target/repository</fromDir>
                                     <includes>*/**</includes>
-                                    <url>dav:https://nexus.blackbelt.cloud/repository/p2-judo</url>
+                                    <url>dav:${env.JUDONG_P2_UPSTREAM}</url>
                                     <toDir>${project-shortname}/${project.version}</toDir>
                                 </configuration>
                             </execution>
