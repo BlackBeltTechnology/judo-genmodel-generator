@@ -22,6 +22,6 @@
    
    <!-- This is currently ignored by Tycho, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=453708 -->
    <!-- The tycho plugin 1.5.0 will fix it -->
-   <repository-reference location="https://nexus.blackbelt.cloud/repository/p2-judo/emf-genmodel-generator/1.0.0.20191222_154354_a61f75c_develop" enabled="true" />
+   <repository-reference location="https://nexus.blackbelt.cloud/repository/p2-judo/emf-genmodel-generator/1.0.0" enabled="true" />
    
 </site>
