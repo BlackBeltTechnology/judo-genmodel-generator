@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
-<target includeMode="feature" name="hu.blackbelt.judo.eclipse.emf.genmodel.generator.targetdefinition.target" sequenceNumber="1593535580719">
+<target includeMode="feature" name="hu.blackbelt.judo.eclipse.emf.genmodel.generator.targetdefinition.target" sequenceNumber="${build.timestamp.millis}">
   <locations>
 	  <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		  <repository location="http://download.eclipse.org/releases/2019-06"/>
+		  <repository location="https://download.eclipse.org/releases/2019-06"/>
 		  <unit id="org.eclipse.xtext.sdk.feature.group" version="2.18.0.v20190528-0716"/>
 	    <unit id="org.eclipse.emf.mwe2.language.sdk.feature.group" version="2.10.0"/>
 	    <unit id="org.eclipse.emf.mwe2.runtime.sdk.feature.group" version="2.10.0"/>
@@ -16,7 +16,7 @@
 		  <unit id="org.eclipse.emf.codegen.ecore.feature.group" version="2.18.0.v20190528-0725"/>
 	  </location>
 	  <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		  <repository location="https://nexus.judo.technology/repository/p2/emf-genmodel-generator/1.0.0"/>
+		  <repository location="${emf-genmodel-generator-location}"/>
 		  <unit id="hu.blackbelt.eclipse.emf.genmodel.generator.feature.feature.group" version="0.0.0"/>
 	  </location>
   </locations>
