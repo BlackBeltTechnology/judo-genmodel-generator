@@ -13,7 +13,7 @@ class RuntimeModelGeneratorWorkflow extends AbstractCompositeWorkflowComponent {
 	String javaGenPath
 	String modelDir
 	String slot = "runtimeModelGenerator"
-	Boolean printXmlOnError = true
+	Boolean printXmlOnError = false
 	
 	override preInvoke() {
 		val slotEntry = new ResourceLoadingSlotEntry() => [
