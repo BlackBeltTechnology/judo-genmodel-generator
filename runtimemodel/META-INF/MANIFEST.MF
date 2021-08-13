@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: %pluginName
+Bundle-Name: JUDO GenModel Model Generator
 Bundle-SymbolicName: hu.blackbelt.judo.eclipse.emf.genmodel.generator.runtimemodel
 Bundle-Version: 1.0.1.qualifier
 Bundle-Vendor: %providerName
