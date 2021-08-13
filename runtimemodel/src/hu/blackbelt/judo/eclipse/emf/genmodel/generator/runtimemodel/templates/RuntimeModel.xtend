@@ -5,10 +5,12 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
 import org.eclipse.xtext.generator.IGenerator
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel
+import hu.blackbelt.eclipse.emf.genmodel.generator.core.engine.GeneratorConfig;
 
 class RuntimeModel implements IGenerator {
 	@Inject extension Naming
-	
+	@Inject GeneratorConfig config
+
 	override doGenerate(Resource input, IFileSystemAccess fsa) {		
 		input.allContents.filter(GenModel).forEach[
 			val content = generate
@@ -345,7 +347,13 @@ class RuntimeModel implements IGenerator {
 		        «modelName»Model «modelName.decapitalize»Model;
 		
 		        public «modelName»ValidationException(«modelName»Model «modelName.decapitalize»Model) {
-		            super("Invalid model\n" + «modelName.decapitalize»Model.getDiagnosticsAsString());
+					«IF config.printXmlOnError»
+						super("Invalid model\n" +
+								«modelName.decapitalize»Model.getDiagnosticsAsString() + "\n" +
+								«modelName.decapitalize»Model.asString());
+					«ELSE»
+						super("Invalid model\n" + «modelName.decapitalize»Model.getDiagnosticsAsString());
+					«ENDIF»
 		            this.«modelName.decapitalize»Model = «modelName.decapitalize»Model;
 		        }
 		    }

@@ -35,7 +35,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Xtend / Xcore -->
-        <emf-genmodel-generator-version>1.0.0</emf-genmodel-generator-version>
+        <emf-genmodel-generator-version>1.0.2.20210813_111847_a7908af_feature_JNG_2861_Remove_model_xml_printing_from_exceptions</emf-genmodel-generator-version>
         <core-resources-version>3.12.0</core-resources-version>
         <eclipse-text-version>3.5.101</eclipse-text-version>
         <emf-version>2.15.0</emf-version>
@@ -244,21 +244,6 @@
                         </execution>
                     </executions>
                 </plugin>
-
-				<plugin>
-					<groupId>org.eclipse.tycho</groupId>
-					<artifactId>tycho-source-plugin</artifactId>
-					<version>${tycho-version}</version>
-
-					<executions>
-						<execution>
-							<id>plugin-source</id>
-							<goals>
-								<goal>plugin-source</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
 
 				<plugin>
 					<groupId>org.eclipse.tycho.extras</groupId>
