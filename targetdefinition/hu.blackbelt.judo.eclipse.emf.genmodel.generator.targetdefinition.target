@@ -16,7 +16,7 @@
 		  <unit id="org.eclipse.emf.codegen.ecore.feature.group" version="2.18.0.v20190528-0725"/>
 	  </location>
 	  <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		  <repository location="https://nexus.judo.technology/repository/p2/emf-genmodel-generator/1.0.0"/>
+		  <repository location="https://nexus.judo.technology/repository/p2/emf-genmodel-generator/1.0.2.20210813_111847_a7908af_feature_JNG_2861_Remove_model_xml_printing_from_exceptions"/>
 		  <unit id="hu.blackbelt.eclipse.emf.genmodel.generator.feature.feature.group" version="0.0.0"/>
 	  </location>
   </locations>
