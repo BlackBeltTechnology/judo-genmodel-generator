@@ -347,13 +347,13 @@ class RuntimeModel implements IGenerator {
 		        «modelName»Model «modelName.decapitalize»Model;
 		
 		        public «modelName»ValidationException(«modelName»Model «modelName.decapitalize»Model) {
-					«IF config.printXmlOnError»
-						super("Invalid model\n" +
-								«modelName.decapitalize»Model.getDiagnosticsAsString() + "\n" +
-								«modelName.decapitalize»Model.asString());
-					«ELSE»
-						super("Invalid model\n" + «modelName.decapitalize»Model.getDiagnosticsAsString());
-					«ENDIF»
+		            «IF config.printXmlOnError»
+		                super("Invalid model\n" +
+		                        «modelName.decapitalize»Model.getDiagnosticsAsString() + "\n" +
+		                        «modelName.decapitalize»Model.asString());
+		            «ELSE»
+		                super("Invalid model\n" + «modelName.decapitalize»Model.getDiagnosticsAsString());
+		            «ENDIF»
 		            this.«modelName.decapitalize»Model = «modelName.decapitalize»Model;
 		        }
 		    }
