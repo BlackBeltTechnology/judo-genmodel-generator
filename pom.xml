@@ -37,7 +37,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Xtend / Xcore -->
-        <emf-genmodel-generator-version>1.0.2.20220206_143501_85483b33_feature_JNG_3516_UpdateEclipse</emf-genmodel-generator-version>
+        <emf-genmodel-generator-version>1.0.2.20220207_104254_ef7b394b_develop</emf-genmodel-generator-version>
         <core-resources-version>3.12.0</core-resources-version>
         <eclipse-text-version>3.5.101</eclipse-text-version>
         <emf-version>2.15.0</emf-version>
@@ -347,7 +347,7 @@
                                 		</goals>
                                 	</pluginExecutionFilter>
                                 	<action>
-                                		<ignore></ignore>
+                                		<ignore />
                                 	</action>
                                 </pluginExecution>
                             </pluginExecutions>
