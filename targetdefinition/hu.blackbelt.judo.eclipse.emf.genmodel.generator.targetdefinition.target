@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
-<target includeMode="feature" name="hu.blackbelt.judo.eclipse.emf.genmodel.generator.targetdefinition.target" sequenceNumber="1644352515408">
+<target includeMode="feature" name="hu.blackbelt.judo.eclipse.emf.genmodel.generator.targetdefinition.target" sequenceNumber="1645563186933">
   <locations>
 	  <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		<repository location="https://download.eclipse.org/releases/2021-12"/>
@@ -16,7 +16,7 @@
 		<unit id="org.eclipse.emf.codegen.ecore.feature.group" version="2.28.0.v20210925-0555"/>
 	  </location>
 	  <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-	    <repository location="https://nexus.judo.technology/repository/p2/emf-genmodel-generator/1.0.2.20220207_104254_ef7b394b_develop"/>
+	    <repository location="https://nexus.judo.technology/repository/p2/emf-genmodel-generator/1.0.2.20220212_195247_075b50e5_develop"/>
 		<unit id="hu.blackbelt.eclipse.emf.genmodel.generator.feature.feature.group" version="0.0.0"/>
 	  </location>
   </locations>
