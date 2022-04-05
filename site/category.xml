@@ -23,6 +23,6 @@
    <!-- This is currently ignored by Tycho, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=453708 -->
    <!-- The tycho plugin 1.5.0 will fix it -->
    <!--
-   <repository-reference location="https://nexus.judo.technology/repository/p2/emf-genmodel-generator/1.0.2.20220301_152315_3cec0ca9_develop" enabled="true" />
+   <repository-reference location="https://nexus.judo.technology/repository/p2/emf-genmodel-generator/1.0.2.20220330_082302_0cadb6da_develop" enabled="true" />
    -->
 </site>
