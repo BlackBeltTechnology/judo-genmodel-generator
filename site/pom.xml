@@ -10,41 +10,4 @@
 	</parent>
 	<artifactId>hu.blackbelt.judo.eclipse.emf.genmodel.generator.site</artifactId>
 	<packaging>eclipse-repository</packaging>
-
-    <profiles>
-        <profile>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <id>update-category-versions</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.google.code.maven-replacer-plugin</groupId>
-                        <artifactId>replacer</artifactId>
-                        <version>1.5.3</version>
-                        <executions>
-                            <execution>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>replace</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <file>${project.basedir}/category.xml</file>
-                            <replacements>
-                                <!-- EMF Genmodel Generator -->
-                                <replacement>
-                                    <token>(repository-reference\ location\=\")(.*?)(emf-genmodel-generator\/)(.*?)(\")</token>
-                                    <value>repository-reference location="$2$3${emf-genmodel-generator-version}"</value>
-                                </replacement>
-                            </replacements>
-                            <regex>true</regex>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
