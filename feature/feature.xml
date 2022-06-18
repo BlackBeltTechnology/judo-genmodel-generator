@@ -232,7 +232,6 @@ litigation.
       <import plugin="org.eclipse.jface" version="3.5.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui" version="3.5.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.ide" version="3.5.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.ui.ide" version="3.5.0" match="greaterOrEqual"/>
       <import plugin="hu.blackbelt.eclipse.emf.genmodel.generator.core" version="1.0.0" match="greaterOrEqual"/>
    </requires>
 
