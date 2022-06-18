@@ -39,7 +39,7 @@
         <!-- Xtend / Xcore -->
         <xtext-version>2.27.0</xtext-version>
 
-        <emf-genmodel-generator-version>1.0.2.20220618_124548_c07fa119_feature_JNG_3784_UpdateTycho</emf-genmodel-generator-version>
+        <emf-genmodel-generator-version>1.0.2.20220618_215944_95bc4477_develop</emf-genmodel-generator-version>
 
     </properties>
     
