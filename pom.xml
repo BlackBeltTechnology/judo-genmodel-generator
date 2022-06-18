@@ -531,7 +531,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <file>${project.basedir}/category.xml</file>
+                            <file>${project.basedir}/site/category.xml</file>
                             <replacements>
                                 <!-- EMF Genmodel Generator -->
                                 <replacement>
