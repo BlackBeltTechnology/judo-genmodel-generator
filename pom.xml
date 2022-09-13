@@ -29,7 +29,7 @@
         <maven>3.8.3</maven>
         <project-shortname>judo-genmodel-generator</project-shortname>
         <project-repositoryId>BlackBeltTechnology/judo-genmodel-generator</project-repositoryId>
-        <tycho-version>2.7.3</tycho-version>
+        <tycho-version>2.7.5</tycho-version>
         <build.qualifier>'v'yyyyMMddHHmm</build.qualifier>
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.source>11</maven.compiler.source>
