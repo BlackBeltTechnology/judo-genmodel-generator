@@ -25,7 +25,7 @@
     </prerequisites>
     
     <properties>
-        <revision>1.0.1-SNAPSHOT</revision>
+        <revision>1.0.1</revision>
         <maven>3.8.3</maven>
         <project-shortname>judo-genmodel-generator</project-shortname>
         <project-repositoryId>BlackBeltTechnology/judo-genmodel-generator</project-repositoryId>
