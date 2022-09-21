@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature id="hu.blackbelt.judo.eclipse.emf.genmodel.generator.feature" version="1.1.1.qualifier">
+   <feature id="hu.blackbelt.judo.eclipse.emf.genmodel.generator.feature" version="1.1.2.qualifier">
       <category name="judo_genmodel_generator"/>
    </feature>
    <category-def name="judo_genmodel_generator" label="Judo GenModel Generator">
