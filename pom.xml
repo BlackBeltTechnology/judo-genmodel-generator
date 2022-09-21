@@ -27,11 +27,11 @@
     </prerequisites>
     
     <properties>
-        <revision>1.0.1</revision>
+        <revision>1.1.0</revision>
         <maven>3.8.3</maven>
         <project-shortname>judo-genmodel-generator</project-shortname>
         <project-repositoryId>BlackBeltTechnology/judo-genmodel-generator</project-repositoryId>
-        <tycho-version>2.7.3</tycho-version>
+        <tycho-version>2.7.5</tycho-version>
         <build.qualifier>'v'yyyyMMddHHmm</build.qualifier>
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.source>11</maven.compiler.source>
@@ -39,9 +39,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Xtend / Xcore -->
-        <xtext-version>2.27.0</xtext-version>
+        <xtext-version>2.28.0</xtext-version>
 
-        <emf-genmodel-generator-version>1.0.2.20220916_082646</emf-genmodel-generator-version>
+        <emf-genmodel-generator-version>1.1.0</emf-genmodel-generator-version>
 
 
         <!--suppress UnresolvedMavenProperty -->
@@ -243,7 +243,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>2.8.1</version>
+                    <version>3.0.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
@@ -396,11 +396,6 @@
             <version>3.2.1</version>
         </dependency>
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.16</version>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.xtend</groupId>
             <artifactId>org.eclipse.xtend.lib</artifactId>
             <version>${xtext-version}</version>
@@ -491,6 +486,7 @@
                             <serverId>ossrh</serverId>
                             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                             <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                            <stagingProgressTimeoutMinutes>15</stagingProgressTimeoutMinutes>
                         </configuration>
                     </plugin>
                 </plugins>
