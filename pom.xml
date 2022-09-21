@@ -27,7 +27,7 @@
     </prerequisites>
     
     <properties>
-        <revision>1.1.0</revision>
+        <revision>1.1.1</revision>
         <maven>3.8.3</maven>
         <project-shortname>judo-genmodel-generator</project-shortname>
         <project-repositoryId>BlackBeltTechnology/judo-genmodel-generator</project-repositoryId>
@@ -248,6 +248,7 @@
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
                     <artifactId>tycho-versions-plugin</artifactId>
+                    <version>${tycho-version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
