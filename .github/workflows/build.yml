@@ -131,18 +131,7 @@ jobs:
           -Prelease-judong \
           deploy
 
-      # Phase 2 - Build and deploy to maven central
-      - name: 🎁 Deploy with Maven (central)
-        if: ${{ always() && startsWith(github.head_ref, 'release') && job.status == 'success' }}
-        run: |-
-          ./mvnw -B -Dstyle.color=always \
-          -Drevision=${{ steps.version.outputs.version }} \
-          -DdeployOnly \
-          -P"release-central,sign-artifacts,-verify-feature" \
-          -Dmaven.test.skip=true \
-          deploy
-
-      # Phase 3 - Deploy to P2
+      # Phase 2 - Deploy to P2
       - name: 🎁 Release P2
         run: |-
           ./mvnw -B -Dstyle.color=always \
@@ -151,6 +140,17 @@ jobs:
           -DdeployOnly \
           -DskipTests=true \
           -DskipModules=true \
+          deploy
+
+      # Phase 3 - Build and deploy to maven central
+      - name: 🎁 Deploy with Maven (central)
+        if: ${{ always() && startsWith(github.head_ref, 'release') && job.status == 'success' }}
+        run: |-
+          ./mvnw -B -Dstyle.color=always \
+          -Drevision=${{ steps.version.outputs.version }} \
+          -DdeployOnly \
+          -P"release-central,sign-artifacts,-verify-feature" \
+          -Dmaven.test.skip=true \
           deploy
 
       - name: 🔎 Sonar Metrics
