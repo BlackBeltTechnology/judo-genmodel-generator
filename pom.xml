@@ -41,7 +41,7 @@
         <!-- Xtend / Xcore -->
         <xtext-version>2.28.0</xtext-version>
 
-        <emf-genmodel-generator-version>1.1.0</emf-genmodel-generator-version>
+        <emf-genmodel-generator-version>1.1.1.20220930_100337_62864061_develop</emf-genmodel-generator-version>
 
 
         <!--suppress UnresolvedMavenProperty -->
@@ -668,7 +668,7 @@
                                         <toc>left</toc>
                                         <icons>font</icons>
                                         <sectanchors>true</sectanchors>
-                                        <idprefix/>
+                                        <idprefix />
                                         <idseparator>-</idseparator>
                                     </attributes>
                                 </configuration>
