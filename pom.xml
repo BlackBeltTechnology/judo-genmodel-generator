@@ -17,6 +17,7 @@
     
     <scm>
         <connection>scm:git:git@github.com:${project-repositoryId}.git</connection>
+        <!--suppress UnresolvedMavenProperty -->
         <developerConnection>scm:git:ssh://${git.username}@github.com:${project-repositoryId}.git
         </developerConnection>
         <url>http://github.com/${project-repositoryId}</url>
@@ -41,7 +42,7 @@
         <!-- Xtend / Xcore -->
         <xtext-version>2.28.0</xtext-version>
 
-        <emf-genmodel-generator-version>1.1.1.20220930_100337_62864061_develop</emf-genmodel-generator-version>
+        <emf-genmodel-generator-version>1.1.1.20230111_082001_20af99b0_feature_JNG_4204_Java17</emf-genmodel-generator-version>
 
 
         <!--suppress UnresolvedMavenProperty -->
@@ -66,6 +67,13 @@
         </license>
     </licenses>
 
+    <repositories>
+        <repository>
+            <id>emf-genmodel-generator</id>
+            <url>mvn:hu.blackbelt.eclipse:hu.blackbelt.eclipse.emf.genmodel.generator.site:${emf-genmodel-generator-version}:zip</url>
+            <layout>p2</layout>
+        </repository>
+    </repositories>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -153,13 +161,6 @@
                 <artifactId>target-platform-configuration</artifactId>
                 <version>${tycho-version}</version>
                 <configuration>
-                    <target>
-                        <artifact>
-                            <groupId>hu.blackbelt.judo</groupId>
-                            <artifactId>hu.blackbelt.judo.eclipse.emf.genmodel.generator.targetdefinition</artifactId>
-                            <version>${project.version}</version>
-                        </artifact>
-                    </target>
                     <environments>
                         <environment>
                             <os>linux</os>
@@ -416,24 +417,7 @@
             </plugins>
         </pluginManagement>
     </build>
-    <dependencies>
-        <dependency>
-            <groupId>org.xtext</groupId>
-            <artifactId>antlr-generator</artifactId>
-            <version>3.2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.xtend</groupId>
-            <artifactId>org.eclipse.xtend.lib</artifactId>
-            <version>${xtext-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>hu.blackbelt.eclipse</groupId>
-            <artifactId>hu.blackbelt.eclipse.emf.genmodel.generator.core</artifactId>
-            <version>${emf-genmodel-generator-version}</version>
-        </dependency>
-    </dependencies>
-    
+
     <profiles>
         <profile>
             <id>modules</id>
@@ -444,7 +428,6 @@
                 </property>
             </activation>
             <modules>
-                <module>targetdefinition</module>
                 <module>runtimemodel</module>
                 <module>feature</module>
                 <module>site</module>
@@ -529,69 +512,6 @@
                 </repository>
             </distributionManagement>
         </profile>
-
-        <profile>
-            <id>release-p2-judong</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>wagon-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>upload-repository</id>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>upload</goal>
-                                </goals>
-                                <configuration>
-                                    <serverId>judong-nexus-distribution</serverId>
-                                    <fromDir>${basedir}/site/target/repository</fromDir>
-                                    <includes>*/**</includes>
-                                    <url>dav:https://nexus.judo.technology/repository/p2-judong/</url>
-                                    <toDir>${project-shortname}/${project.version}</toDir>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <id>update-category-versions</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.google.code.maven-replacer-plugin</groupId>
-                        <artifactId>replacer</artifactId>
-                        <version>1.5.3</version>
-                        <executions>
-                            <execution>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>replace</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <file>${project.basedir}/site/category.xml</file>
-                            <replacements>
-                                <!-- EMF Genmodel Generator -->
-                                <replacement>
-                                    <token>(repository-reference\ location\=\")(.*?)(emf-genmodel-generator\/)(.*?)(\")</token>
-                                    <value>repository-reference location="$2$3${emf-genmodel-generator-version}"</value>
-                                </replacement>
-                            </replacements>
-                            <regex>true</regex>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
 
         <profile>
             <id>generate-github-asciidoc-diagrams</id>
