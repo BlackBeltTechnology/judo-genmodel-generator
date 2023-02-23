@@ -5,11 +5,11 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
 import org.eclipse.xtext.generator.IGenerator
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel
-import hu.blackbelt.eclipse.emf.genmodel.generator.core.engine.GeneratorConfig;
+import hu.blackbelt.judo.eclipse.emf.genmodel.generator.runtimemodel.engine.RuntimeModelGeneratorConfig
 
 class RuntimeModel implements IGenerator {
 	@Inject extension Naming
-	@Inject GeneratorConfig config
+	@Inject RuntimeModelGeneratorConfig config
 
 	override doGenerate(Resource input, IFileSystemAccess fsa) {		
 		input.allContents.filter(GenModel).forEach[
@@ -56,7 +56,9 @@ class RuntimeModel implements IGenerator {
 		 * <pre>
 		 *    «modelName»Model «modelName.decapitalize»Model = «modelName»Model.load«modelName»Model(«modelName.decapitalize»LoadArgumentsBuilder()
 		 *                 .uri(URI.createFileURI(new File("src/test/model/test.«modelName.decapitalize»").getAbsolutePath()))
+		 «IF config.resolveModelName.blank»
 		 *                 .name("test")
+		 «ENDIF»
 		 *                 .build());
 		 *
 		 * </pre>
@@ -68,17 +70,22 @@ class RuntimeModel implements IGenerator {
 		 *    BundleURIHandler bundleURIHandler = new BundleURIHandler("urn", "", bundleContext.getBundle());
 		 *
 		 *    «modelName»Model «modelName.decapitalize»Model = «modelName»Model.build«modelName»Model()
+		 «IF config.resolveModelName.blank»
 		 *                 .name("test")
+		 «ENDIF»
+		 «IF config.resolveModelVersion.blank»
 		 *                 .version("1.0.0")
+		 «ENDIF»
 		 *                 .uri(URI.createURI("urn:test.«modelName.decapitalize»"))
 		 *                 .uriHandler(bundleURIHandler)
-		 *                 .metaVersionRange(bundleContext.getBundle().getHeaders().get("[1.0,2))).build();
 		 * </pre>
 		 *
 		 * Create an empty «modelName.decapitalize» model
 		 * <pre>
 		 *    «modelName»Model «modelName.decapitalize»Model = «modelName»Model.build«modelName»Model()
+		 «IF config.resolveModelName.blank»
 		 *                 .name("test")
+		 «ENDIF»
 		 *                 .uri(URI.createFileURI("test.model"))
 		 *                 .build()
 		 * </pre>
@@ -88,19 +95,41 @@ class RuntimeModel implements IGenerator {
 		
 		    public static final String NAME = "name";
 		    public static final String VERSION = "version";
-		    public static final String CHECKSUM = "checksum";
-		    public static final String META_VERSION_RANGE = "meta-version-range";
 		    public static final String URI = "uri";
 		    public static final String RESOURCESET = "resourceset";
-		    public static final String TAGS = "tags";
 		
-		    private String name;
-		    private String version;
+		    «IF config.resolveModelName.blank»
+		        private String name;
+		    «ENDIF»
+		    «IF config.resolveModelVersion.blank»
+		        private String version;
+		    «ENDIF»
 		    private URI uri;
-		    private String checksum;
-		    private String metaVersionRange;
 		    private «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport;
-		    private Set<String> tags;
+		    
+		    /**
+		     * Return the model's name
+		     * @return model's name
+		     */
+		    public String getName() {
+		    	«IF config.resolveModelName.blank»
+		    	   return name;
+		    	«ELSE»
+		    	   return «config.resolveModelName»;
+		    	«ENDIF»
+			}
+
+		    /**
+		     * Return the model's version
+		     * @return model's version
+		     */
+		    public String getVersion() {
+		    	«IF config.resolveModelVersion.blank»
+		    	   return version;
+		    	«ELSE»
+		    	   return «config.resolveModelVersion»;
+		    	«ENDIF»
+			}
 		
 		    /**
 		     * Return all properties as a {@link Dictionary}
@@ -108,14 +137,19 @@ class RuntimeModel implements IGenerator {
 		     */
 		    public Dictionary<String, Object> toDictionary() {
 		        Dictionary<String, Object> ret = new Hashtable<>();
-		        ret.put(NAME, name);
-		        ret.put(VERSION, version);
+		        ret.put(NAME, getName());
+		        ret.put(VERSION, getVersion());
 		        ret.put(URI, uri);
-		        ret.put(CHECKSUM, checksum);
-		        ret.put(META_VERSION_RANGE, metaVersionRange);
 		        ret.put(RESOURCESET, «modelName.decapitalize»ModelResourceSupport.getResourceSet());
-		        ret.put(TAGS, tags);
 		        return ret;
+		    }
+		
+		    /**
+		     * Get the model's {@link «modelName»ModelResourceSupport} resource helper itself.
+		     * @return instance of {@link «modelName»ModelResourceSupport}
+		     */
+		    public «modelName»ModelResourceSupport get«modelName»ModelResourceSupport() {
+		        return «modelName.decapitalize»ModelResourceSupport;
 		    }
 		
 		    /**
@@ -237,21 +271,21 @@ class RuntimeModel implements IGenerator {
 		                    .load«modelName»(loadArguments.to«modelName»ModelResourceSupportLoadArgumentsBuilder()
 		                            .validateModel(false));
 		            «modelName»Model «modelName.decapitalize»Model = build«modelName»Model()
-		                    .name(loadArguments.getName()
-		                            .orElseThrow(() -> new IllegalArgumentException("Name is mandatory")))
+		                    «IF config.resolveModelName.isBlank»
+		                        .name(loadArguments.getName()
+		                                .orElseThrow(() -> new IllegalArgumentException("Name is mandatory")))
+		                    «ENDIF»
+		                    «IF config.resolveModelVersion.isBlank»
 		                    .version(loadArguments.getVersion()
 		                            .orElse("1.0.0"))
-		                    .uri(loadArguments.getUri()
-		                            .orElseGet(() ->
-		                                    org.eclipse.emf.common.util.URI.createURI(
-		                                            loadArguments.getName().get() + "-«modelName.decapitalize».model")))
-		                    .checksum(loadArguments.getChecksum()
-		                            .orElse("NON-DEFINED"))
-		                    .tags(loadArguments.getTags()
-		                            .orElse(Collections.emptySet()))
+                            «ENDIF»
+		                    .uri(loadArguments.getUri().orElseGet(() -> org.eclipse.emf.common.util.URI.createURI(
+		                          «IF config.resolveModelName.blank»
+		                              getName().get() + "-«modelName.decapitalize».model")))
+		                          «ELSE»
+		                              String.valueOf(System.currentTimeMillis()) + "-«modelName.decapitalize».model")))
+		                          «ENDIF»
 		                    .«modelName.decapitalize»ModelResourceSupport(«modelName.decapitalize»ModelResourceSupport)
-		                    .metaVersionRange(loadArguments.getAcceptedMetaVersionRange()
-		                            .orElse("[0,9999)"))
 		                    .build();
 		
 		            setupRelativeUriRoot(«modelName.decapitalize»Model.getResourceSet(), loadArguments.uri);
@@ -364,17 +398,18 @@ class RuntimeModel implements IGenerator {
 		     */
 		    public static class LoadArguments {
 		        URI uri;
+		        «IF config.resolveModelName.blank»
 		        String name;
+		        «ENDIF»
 		        URIHandler uriHandler;
 		        ResourceSet resourceSet;
+		        «IF config.resolveModelName.blank»
 		        String version;
-		        String checksum;
-		        String acceptedMetaVersionRange;
+		        «ENDIF»
 		        Map<Object, Object> loadOptions;
 		        boolean validateModel;
 		        InputStream inputStream;
 		        File file;
-		        Set<String> tags;
 		
 		        private static URIHandler $default$uriHandler() {
 		            return null;
@@ -383,19 +418,12 @@ class RuntimeModel implements IGenerator {
 		        private static ResourceSet $default$resourceSet() {
 		            return null;
 		        }
-		
+		        «IF config.resolveModelVersion.blank»
 		        private static String $default$version() {
 		            return "1.0.0";
 		        }
-		
-		        private static String $default$checksum() {
-		            return "NOT-SET";
-		        }
-		
-		        private static String $default$acceptedMetaVersionRange() {
-		            return "[0,9999]";
-		        }
-		
+		        «ENDIF»
+				
 		        private static File $default$file() {
 		            return null;
 		        }
@@ -404,10 +432,6 @@ class RuntimeModel implements IGenerator {
 		            return null;
 		        }
 
-		        private static Set<String> $default$tags() {
-		            return  Collections.emptySet();
-		        }
-		
 		        private static Map<Object, Object> $default$loadOptions() {
 		            return «modelName»ModelResourceSupport.get«modelName»ModelDefaultLoadOptions();
 		        }
@@ -415,10 +439,12 @@ class RuntimeModel implements IGenerator {
 		        Optional<URI> getUri() {
 		            return ofNullable(uri);
 		        }
-		
+		        «IF config.resolveModelName.blank»	
 		        Optional<String> getName() {
 		            return ofNullable(name);
+		            
 		        }
+		        «ENDIF»
 		
 		        Optional<URIHandler> getUriHandler() {
 		            return ofNullable(uriHandler);
@@ -427,23 +453,12 @@ class RuntimeModel implements IGenerator {
 		        Optional<ResourceSet> getResourceSet() {
 		            return ofNullable(resourceSet);
 		        }
-		
+		        «IF config.resolveModelVersion.blank»
 		        Optional<String> getVersion() {
 		            return ofNullable(version);
 		        }
-		
-		        Optional<String> getChecksum() {
-		            return ofNullable(checksum);
-		        }
-		
-		        Optional<String> getAcceptedMetaVersionRange() {
-		            return ofNullable(acceptedMetaVersionRange);
-		        }
-
-		        Optional<Set<String>> getTags() {
-		            return ofNullable(tags);
-		        }
-		
+		        «ENDIF»
+				
 		        Optional<Map<Object, Object>> getLoadOptions() {
 		            return ofNullable(loadOptions);
 		        }
@@ -465,7 +480,9 @@ class RuntimeModel implements IGenerator {
 		         */
 		        public static class LoadArgumentsBuilder {
 		            private URI uri;
+		            «IF config.resolveModelName.blank»
 		            private String name;
+		            «ENDIF»
 		
 		            private boolean uriHandler$set;
 		            private URIHandler uriHandler;
@@ -473,18 +490,11 @@ class RuntimeModel implements IGenerator {
 		            private boolean resourceSet$set;
 		            private ResourceSet resourceSet;
 		            
+		            «IF config.resolveModelVersion.blank»
 		            private boolean version$set;
 		            private String version;
-		            
-		            private boolean checksum$set;
-		            private String checksum;
-		            
-		            private boolean acceptedMetaVersionRange$set;
-		            private String acceptedMetaVersionRange;
-
-		            private boolean tags$set;
-		            private Set<String> tags;
-		            
+		            «ENDIF»
+		            		            
 		            private boolean loadOptions$set;
 		            private Map<Object, Object> loadOptions;
 		
@@ -511,7 +521,7 @@ class RuntimeModel implements IGenerator {
 		                return this;
 		            }
 		
-		            
+		            «IF config.resolveModelName.blank»
 		            /**
 		             * Defines the name of the model.
 		             * This is mandatory.
@@ -521,6 +531,7 @@ class RuntimeModel implements IGenerator {
 		                this.name = name;
 		                return this;
 		            }
+		            «ENDIF»
 		
 		            /**
 		             * Defines the {@link URIHandler} used for model IO. If not defined the default is EMF used.
@@ -543,7 +554,7 @@ class RuntimeModel implements IGenerator {
 		                return this;
 		            }
 		
-		            
+		            «IF config.resolveModelVersion.blank»
 		            /**
 		             * Defines the model version. If its not defined the version will be 1.0.0
 		             */
@@ -553,39 +564,7 @@ class RuntimeModel implements IGenerator {
 		                version$set = true;
 		                return this;
 		            }
-		
-		            
-		            /**
-		             * Defines the model checksum. If its not defined 'notused' is defined.
-		             */
-		            public LoadArgumentsBuilder checksum(final String checksum) {
-		                requireNonNull(checksum);
-		                this.checksum = checksum;
-		                checksum$set = true;
-		                return this;
-		            }
-		
-		            
-		            /**
-		             * Defines the accepted version range of the meta model. If its not defined [1.0,999) is used.
-		             */
-		            public LoadArgumentsBuilder acceptedMetaVersionRange(final String acceptedMetaVersionRange) {
-		                requireNonNull(acceptedMetaVersionRange);
-		                this.acceptedMetaVersionRange = acceptedMetaVersionRange;
-		                acceptedMetaVersionRange$set = true;
-		                return this;
-		            }
-
-		            /**
-		             * Defines the tags of mdoel.
-		             */
-		            public LoadArgumentsBuilder tags(final Set<String> tags) {
-		                requireNonNull(tags);
-		                this.tags = tags;
-		                tags$set = true;
-		                return this;
-		            }
-		
+		            «ENDIF»
 		            
 		            /**
 		             * Defines the load options for model. If not defined the
@@ -635,16 +614,10 @@ class RuntimeModel implements IGenerator {
 		                if (!uriHandler$set) uriHandler = LoadArguments.$default$uriHandler();
 		                ResourceSet resourceSet = this.resourceSet;
 		                if (!resourceSet$set) resourceSet = LoadArguments.$default$resourceSet();
+		                «IF config.resolveModelVersion.blank»
 		                String version = this.version;
 		                if (!version$set) version = LoadArguments.$default$version();
-		                String checksum = this.checksum;
-		                if (!checksum$set) checksum = LoadArguments.$default$checksum();
-		                String acceptedMetaVersionRange = this.acceptedMetaVersionRange;
-		                if (!acceptedMetaVersionRange$set)
-		                    acceptedMetaVersionRange = LoadArguments.$default$acceptedMetaVersionRange();
-		                Set<String> tags = this.tags;
-		                if (!tags$set)
-		                    tags = LoadArguments.$default$tags();
+		                «ENDIF»
 
 		                Map<Object, Object> loadOptions = this.loadOptions;
 		                if (!loadOptions$set) loadOptions = LoadArguments.$default$loadOptions();
@@ -653,25 +626,38 @@ class RuntimeModel implements IGenerator {
 		                InputStream inputStream = this.inputStream;
 		                if (!inputStream$set) inputStream = LoadArguments.$default$inputStream();
 		
-		                return new LoadArguments(uri, name, uriHandler, resourceSet, version,
-		                        checksum, acceptedMetaVersionRange, loadOptions, validateModel, file, inputStream, tags);
+		                return new LoadArguments(
+		                        uri, 
+		                        «IF config.resolveModelName.blank»
+		                        name, 
+		                        «ENDIF»
+		                        uriHandler, 
+		                        resourceSet, 
+		                        «IF config.resolveModelName.blank»
+		                        version,
+		                        «ENDIF»
+		                        loadOptions, 
+		                        validateModel, 
+		                        file, 
+		                        inputStream);
 		            }
 		
 		            @java.lang.Override
 		            
 		            public java.lang.String toString() {
 		                return "«modelName»Model.LoadArguments.LoadArgumentsBuilder(uri=" + this.uri
+		                        «IF config.resolveModelName.blank»
 		                        + ", name=" + this.name
+		                        «ENDIF»
 		                        + ", uriHandler=" + this.uriHandler
 		                        + ", resourceSet=" + this.resourceSet
+		                        «IF config.resolveModelVersion.blank»
 		                        + ", version=" + this.version
-		                        + ", checksum=" + this.checksum
-		                        + ", acceptedMetaVersionRange=" + this.acceptedMetaVersionRange
+		                        «ENDIF»
 		                        + ", loadOptions=" + this.loadOptions
 		                        + ", validateModel=" + this.validateModel
 		                        + ", file=" + this.file
 		                        + ", inputStream=" + this.inputStream
-		                        + ", tags=" + this.tags
 		                        + ")";
 		            }
 		        }
@@ -683,29 +669,31 @@ class RuntimeModel implements IGenerator {
 		
 		        
 		        private LoadArguments(final URI uri,
+		                              «IF config.resolveModelName.blank»
 		                              final String name,
+		                              «ENDIF»
 		                              final URIHandler uriHandler,
 		                              final ResourceSet resourceSet,
+		                              «IF config.resolveModelVersion.blank»
 		                              final String version,
-		                              final String checksum,
-		                              final String acceptedMetaVersionRange,
+		                              «ENDIF»
 		                              final Map<Object, Object> loadOptions,
 		                              final boolean validateModel,
 		                              final File file,
-		                              final InputStream inputStream,
-		                              final Set<String> tags) {
+		                              final InputStream inputStream) {
 		            this.uri = uri;
+		            «IF config.resolveModelName.blank»
 		            this.name = name;
+		            «ENDIF»
 		            this.uriHandler = uriHandler;
 		            this.resourceSet = resourceSet;
+		            «IF config.resolveModelVersion.blank»
 		            this.version = version;
-		            this.checksum = checksum;
-		            this.acceptedMetaVersionRange = acceptedMetaVersionRange;
+		            «ENDIF»
 		            this.loadOptions = loadOptions;
 		            this.validateModel = validateModel;
 		            this.file = file;
 		            this.inputStream = inputStream;
-		            this.tags = tags;
 		        }
 		
 		        
@@ -716,7 +704,11 @@ class RuntimeModel implements IGenerator {
 		                            .uri(getUri()
 		                                    .orElseGet(() ->
 		                                            org.eclipse.emf.common.util.URI.createURI(
+		                                                «IF config.resolveModelName.blank»
 		                                                    getName().get() + "-«modelName.decapitalize».model")))
+		                                                «ELSE»
+		                                                    String.valueOf(System.currentTimeMillis()) + "-«modelName.decapitalize».model")))
+		                                                «ENDIF»
 		                            .validateModel(isValidateModel());
 		
 		            getUriHandler().ifPresent(argumentsBuilder::uriHandler);
@@ -899,22 +891,17 @@ class RuntimeModel implements IGenerator {
 		
 		    
 		    public static class «modelName»ModelBuilder {
-		        
+		
+		        «IF config.resolveModelName.blank»
 		        private String name;
+		        «ENDIF»
 		        private URI uri;
 		
+		        «IF config.resolveModelVersion.blank»
 		        private boolean version$set;
 		        private String version;
-		
-		        private boolean checksum$set;
-		        private String checksum;
-		
-		        private boolean metaVersionRange$set;
-		        private String metaVersionRange;
-
-		        private boolean tags$set;
-		        private Set<String> tags;
-		
+		        «ENDIF»
+				
 		        private boolean «modelName.decapitalize»ModelResourceSupport$set;
 		        private «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport;
 		
@@ -924,11 +911,11 @@ class RuntimeModel implements IGenerator {
 		        private URIHandler uriHandler;
 		        private boolean uriHandler$set;
 		
-		
 		        «modelName»ModelBuilder() {
 		        }
 		
-		        
+		
+		        «IF config.resolveModelName.blank»
 		        /**
 		         * Defines name of the model. Its mandatory.
 		         */
@@ -936,6 +923,7 @@ class RuntimeModel implements IGenerator {
 		            this.name = name;
 		            return this;
 		        }
+		        «ENDIF»
 		
 		        
 		        /**
@@ -946,7 +934,7 @@ class RuntimeModel implements IGenerator {
 		            return this;
 		        }
 		
-		        
+		        «IF config.resolveModelVersion.blank»
 		        /**
 		         * Defines the version of the model. Its mandatory.
 		         */
@@ -956,40 +944,8 @@ class RuntimeModel implements IGenerator {
 		            version$set = true;
 		            return this;
 		        }
-		
-		        
-		        /**
-		         * Defines the checksum of the model. Its mandatory.
-		         */
-		        public «modelName»ModelBuilder checksum(final String checksum) {
-		            requireNonNull(checksum);
-		            this.checksum = checksum;
-		            this.checksum$set = true;
-		            return this;
-		        }
-		
-		        
-		        /**
-		         * Defines the version of the model.
-		         */
-		        public «modelName»ModelBuilder metaVersionRange(final String metaVersionRange) {
-		            requireNonNull(metaVersionRange);
-		            this.metaVersionRange = metaVersionRange;
-		            this.metaVersionRange$set = true;
-		            return this;
-		        }
+		        «ENDIF»
 
-		        /**
-		         * Defines the tags of the model.
-		         */
-		        public «modelName»ModelBuilder tags(final Set<String> tags) {
-		            requireNonNull(tags);
-		            this.tags = tags;
-		            this.tags$set = true;
-		            return this;
-		        }
-		
-		        
 		        public «modelName»ModelBuilder «modelName.decapitalize»ModelResourceSupport(final «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport) {
 		            requireNonNull(«modelName.decapitalize»ModelResourceSupport);
 		            this.«modelName.decapitalize»ModelResourceSupport = «modelName.decapitalize»ModelResourceSupport;
@@ -1014,7 +970,13 @@ class RuntimeModel implements IGenerator {
 		
 		        public «modelName»Model build() {
 		            org.eclipse.emf.common.util.URI uriPhysicalOrLogical = ofNullable(uri)
-		                    .orElseGet(() -> org.eclipse.emf.common.util.URI.createURI(name + "-«modelName.decapitalize».model"));
+		                    .orElseGet(() -> org.eclipse.emf.common.util.URI.createURI(
+		                          «IF config.resolveModelName.blank»
+		                              name + "-«modelName.decapitalize».model"));
+		                          «ELSE»
+		                              String.valueOf(System.currentTimeMillis()) + "-«modelName.decapitalize».model"));
+		                          «ENDIF»
+		
 		
 		            «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport = this.«modelName.decapitalize»ModelResourceSupport;
 		            if (!«modelName.decapitalize»ModelResourceSupport$set) {
@@ -1030,25 +992,28 @@ class RuntimeModel implements IGenerator {
 		                this.uri = «modelName.decapitalize»ModelResourceSupport.getResource().getURI();
 		            }
 		
+		            «IF config.resolveModelVersion.blank»
 		            String version = this.version;
 		            if (!version$set) version = LoadArguments.$default$version();
-		            String checksum = this.checksum;
-		            if (!checksum$set) checksum = LoadArguments.$default$checksum();
-		            String metaVersionRange = this.metaVersionRange;
-		            if (!metaVersionRange$set) metaVersionRange = LoadArguments.$default$acceptedMetaVersionRange();
-		            Set<String> tags = this.tags;
-		            if (!tags$set) tags = LoadArguments.$default$tags();
+		            «ENDIF»
 		
-		            return new «modelName»Model(name, version, uriPhysicalOrLogical, checksum, metaVersionRange, tags, «modelName.decapitalize»ModelResourceSupport);
+		            return new «modelName»Model(
+		                «IF config.resolveModelName.blank»name,«ENDIF»
+		                «IF config.resolveModelVersion.blank»version,«ENDIF»
+		                uriPhysicalOrLogical,
+		                «modelName.decapitalize»ModelResourceSupport);
 		        }
 		
 		        @java.lang.Override
 		        public java.lang.String toString() {
-		            return "«modelName»Model.«modelName»ModelBuilder(name=" + this.name
-		                    + ", version=" + this.version
-		                    + ", uri=" + this.uri
-		                    + ", checksum=" + this.checksum
-		                    + ", metaVersionRange=" + this.metaVersionRange
+		            return "«modelName»Model.«modelName»ModelBuilder("
+		                    «IF config.resolveModelName.blank»
+		                    + "name=" + this.name + ", "
+		                    «ENDIF»
+		                    «IF config.resolveModelVersion.blank»
+		                    + "version=" + this.version + ", " 
+		                    «ENDIF»
+		                    + "uri=" + this.uri
 		                    + ", «modelName.decapitalize»ModelResourceSupport=" + this.«modelName.decapitalize»ModelResourceSupport + ")";
 		        }
 		    }
@@ -1057,49 +1022,41 @@ class RuntimeModel implements IGenerator {
 		        return new «modelName»ModelBuilder();
 		    }
 		
-		    private «modelName»Model(final String name,
+		    private «modelName»Model(
+		                     «IF config.resolveModelName.blank»
+		                     final String name,
+		                     «ENDIF»
+		                     «IF config.resolveModelVersion.blank»
 		                     final String version,
+		                     «ENDIF»
 		                     final URI uri,
-		                     final String checksum,
-		                     final String metaVersionRange,
-		                     final Set<String> tags,
 		                     final «modelName»ModelResourceSupport «modelName.decapitalize»ModelResourceSupport) {
 		
+		        «IF config.resolveModelName.blank»
 		        requireNonNull(name, "Name is mandatory");
-		        requireNonNull(name, "URI is mandatory");
-		
+		        «ENDIF»
+		        requireNonNull(uri, "URI is mandatory");
+		        «IF config.resolveModelName.blank»		
 		        this.name = name;
+		        «ENDIF»
+		        «IF config.resolveModelVersion.blank»
 		        this.version = version;
+		        «ENDIF»
 		        this.uri = uri;
-		        this.checksum = checksum;
-		        this.metaVersionRange = metaVersionRange;
-		        this.tags = tags;
 		        this.«modelName.decapitalize»ModelResourceSupport = «modelName.decapitalize»ModelResourceSupport;
 		    }
 		
 		    @java.lang.Override
 		    public java.lang.String toString() {
-		        return "«modelName»Model(name=" + this.getName()
+		        return "«modelName»Model("
+		                «IF config.resolveModelName.blank»
+		                + "name=" + this.getName()
+		                «ENDIF»
+		                «IF config.resolveModelVersion.blank»
 		                + ", version=" + this.getVersion()
+		                «ENDIF»
 		                + ", uri=" + this.getUri()
-		                + ", checksum=" + this.getChecksum()
-		                + ", metaVersionRange=" + this.getMetaVersionRange()
-		                + ", tags=" + this.getTags()
 		                + ", «modelName.decapitalize»ModelResourceSupport=" + this.«modelName.decapitalize»ModelResourceSupport + ")";
-		    }
-		
-		    /**
-		     * Get the name of the model.
-		     */
-		    public String getName() {
-		        return this.name;
-		    }
-		
-		    /**
-		     * Get the model version.
-		     */
-		    public String getVersion() {
-		        return this.version;
 		    }
 		
 		    /**
@@ -1107,30 +1064,7 @@ class RuntimeModel implements IGenerator {
 		     */
 		    public URI getUri() {
 		        return this.uri;
-		    }
-		
-		    /**
-		     * Get the checksum of the model.
-		     */
-		    public String getChecksum() {
-		        return this.checksum;
-		    }
-		
-		    /**
-		     * Get the accepted range of meta model version.
-		     */
-		    public String getMetaVersionRange() {
-		        return this.metaVersionRange;
-		    }
-
-		
-		    /**
-		     * Get the tags.
-		     */
-		    public Set<String> getTags() {
-		        return this.tags;
-		    }
-
+		    }		
 		}
 	'''
 }

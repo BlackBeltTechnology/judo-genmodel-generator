@@ -4,8 +4,8 @@ import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtext.generator.GeneratorComponent.Outlet
 import org.eclipse.xtext.mwe.ResourceLoadingSlotEntry
 import org.eclipse.emf.mwe2.runtime.workflow.AbstractCompositeWorkflowComponent
-import hu.blackbelt.eclipse.emf.genmodel.generator.core.engine.GeneratorConfig
 import hu.blackbelt.judo.eclipse.emf.genmodel.generator.runtimemodel.engine.RuntimeModelGeneratorStandaloneSetup
+import hu.blackbelt.judo.eclipse.emf.genmodel.generator.runtimemodel.engine.RuntimeModelGeneratorConfig
 
 @Accessors
 class RuntimeModelGeneratorWorkflow extends AbstractCompositeWorkflowComponent {
@@ -14,15 +14,19 @@ class RuntimeModelGeneratorWorkflow extends AbstractCompositeWorkflowComponent {
 	String modelDir
 	String slot = "runtimeModelGenerator"
 	Boolean printXmlOnError = false
+	String resolveModelName = ""
+	String resolveModelVersion = ""
 	
 	override preInvoke() {
 		val slotEntry = new ResourceLoadingSlotEntry() => [
 			setSlot(slot)
 		]
 		
-		val config = new GeneratorConfig() => [
+		val config = new RuntimeModelGeneratorConfig() => [
 			setJavaGenPath(javaGenPath)
 			setPrintXmlOnError(printXmlOnError)
+			setResolveModelName(resolveModelName)
+			setResolveModelVersion(resolveModelVersion)
 		]
 		
 		val setup = new RuntimeModelGeneratorStandaloneSetup() => [
