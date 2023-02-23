@@ -1,5 +1,8 @@
 package hu.blackbelt.judo.eclipse.emf.genmodel.generator.runtimemodel.engine;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Module;
+
 /*-
  * #%L
  * hu.blackbelt.judo.eclipse.emf.genmodel.generator.runtimemodel
@@ -22,9 +25,28 @@ package hu.blackbelt.judo.eclipse.emf.genmodel.generator.runtimemodel.engine;
 
 import hu.blackbelt.eclipse.emf.genmodel.generator.core.engine.AbstractGenModelGeneratorModule;
 import hu.blackbelt.eclipse.emf.genmodel.generator.core.engine.AbstractGenModelGeneratorStandaloneSetup;
+import hu.blackbelt.eclipse.emf.genmodel.generator.core.engine.GeneratorConfig;
 
 public class RuntimeModelGeneratorStandaloneSetup extends AbstractGenModelGeneratorStandaloneSetup {
 
+	private RuntimeModelGeneratorConfig runtimeModelGeneratorConfig;
+	
+	public void setConfig(RuntimeModelGeneratorConfig runtimeModelGeneratorConfig) {
+		this.runtimeModelGeneratorConfig = runtimeModelGeneratorConfig;
+	}
+		
+	@Override
+	public Module getDynamicModule () {
+		return new AbstractModule() {
+			@Override
+			protected void configure() {
+				bind(GeneratorConfig.class).toInstance(runtimeModelGeneratorConfig);
+				bind(RuntimeModelGeneratorConfig.class).toInstance(runtimeModelGeneratorConfig);
+			}
+		};
+	}
+
+	
 	@Override
 	public AbstractGenModelGeneratorModule getGenModelModule() {
 		// TODO Auto-generated method stub
