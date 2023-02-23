@@ -280,11 +280,11 @@ class RuntimeModel implements IGenerator {
 		                            .orElse("1.0.0"))
                             «ENDIF»
 		                    .uri(loadArguments.getUri().orElseGet(() -> org.eclipse.emf.common.util.URI.createURI(
-		                          «IF config.resolveModelName.blank»
-		                              getName().get() + "-«modelName.decapitalize».model")))
-		                          «ELSE»
-		                              String.valueOf(System.currentTimeMillis()) + "-«modelName.decapitalize».model")))
-		                          «ENDIF»
+		                            «IF config.resolveModelName.blank»
+		                                loadArguments.name + "-«modelName.decapitalize».model")))
+		                            «ELSE»
+		                                String.valueOf(System.currentTimeMillis()) + "-«modelName.decapitalize».model")))
+		                            «ENDIF»
 		                    .«modelName.decapitalize»ModelResourceSupport(«modelName.decapitalize»ModelResourceSupport)
 		                    .build();
 		
