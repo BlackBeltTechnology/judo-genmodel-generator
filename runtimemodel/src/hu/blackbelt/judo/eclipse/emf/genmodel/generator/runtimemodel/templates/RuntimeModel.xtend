@@ -42,7 +42,7 @@ class RuntimeModel implements IGenerator {
 		import static «packageName».support.«modelName»ModelResourceSupport.setupRelativeUriRoot;
 		import static java.util.Objects.requireNonNull;
 		import static java.util.Optional.ofNullable;
-		
+		import static org.eclipse.emf.common.util.URI.createURI;
 				
 		/**
 		 * A wrapper class on a «modelName» metamodel based model. This wrapper organizing the model a structure which can be used
@@ -55,7 +55,7 @@ class RuntimeModel implements IGenerator {
 		 * Load an model from file.
 		 * <pre>
 		 *    «modelName»Model «modelName.decapitalize»Model = «modelName»Model.load«modelName»Model(«modelName.decapitalize»LoadArgumentsBuilder()
-		 *                 .uri(URI.createFileURI(new File("src/test/model/test.«modelName.decapitalize»").getAbsolutePath()))
+		 *                 .uri(org.eclipse.emf.common.util.URI.createFileURI(new File("src/test/model/test.«modelName.decapitalize»").getAbsolutePath()))
 		 «IF config.resolveModelName.blank»
 		 *                 .name("test")
 		 «ENDIF»
@@ -76,7 +76,7 @@ class RuntimeModel implements IGenerator {
 		 «IF config.resolveModelVersion.blank»
 		 *                 .version("1.0.0")
 		 «ENDIF»
-		 *                 .uri(URI.createURI("urn:test.«modelName.decapitalize»"))
+		 *                 .uri(org.eclipse.emf.common.util.URI.createURI("urn:test.«modelName.decapitalize»"))
 		 *                 .uriHandler(bundleURIHandler)
 		 * </pre>
 		 *
@@ -271,19 +271,19 @@ class RuntimeModel implements IGenerator {
 		                    .load«modelName»(loadArguments.to«modelName»ModelResourceSupportLoadArgumentsBuilder()
 		                            .validateModel(false));
 		            «modelName»Model «modelName.decapitalize»Model = build«modelName»Model()
-		                    «IF config.resolveModelName.isBlank»
+		                    «IF config.resolveModelName.blank»
 		                        .name(loadArguments.getName()
 		                                .orElseThrow(() -> new IllegalArgumentException("Name is mandatory")))
 		                    «ENDIF»
-		                    «IF config.resolveModelVersion.isBlank»
+		                    «IF config.resolveModelVersion.blank»
 		                    .version(loadArguments.getVersion()
-		                            .orElse("1.0.0"))
+		                            .orElse("0.0.0"))
                             «ENDIF»
-		                    .uri(loadArguments.getUri().orElseGet(() -> org.eclipse.emf.common.util.URI.createURI(
+		                    .uri(loadArguments.getUri().orElseGet(() -> 
 		                            «IF config.resolveModelName.blank»
-		                                loadArguments.name + "-«modelName.decapitalize».model")))
+		                                createURI(loadArguments.name + "-«modelName.decapitalize».model")))
 		                            «ELSE»
-		                                String.valueOf(System.currentTimeMillis()) + "-«modelName.decapitalize».model")))
+		                                createURI("«modelName.decapitalize».model")))
 		                            «ENDIF»
 		                    .«modelName.decapitalize»ModelResourceSupport(«modelName.decapitalize»ModelResourceSupport)
 		                    .build();
@@ -703,12 +703,11 @@ class RuntimeModel implements IGenerator {
 		                    «modelName»ModelResourceSupport.LoadArguments.«modelName.decapitalize»LoadArgumentsBuilder()
 		                            .uri(getUri()
 		                                    .orElseGet(() ->
-		                                            org.eclipse.emf.common.util.URI.createURI(
-		                                                «IF config.resolveModelName.blank»
-		                                                    getName().get() + "-«modelName.decapitalize».model")))
-		                                                «ELSE»
-		                                                    String.valueOf(System.currentTimeMillis()) + "-«modelName.decapitalize».model")))
-		                                                «ENDIF»
+		                                        «IF config.resolveModelName.blank»
+		                                            createURI(getName().get() + "-«modelName.decapitalize».model")))
+                                                «ELSE»
+		                                            createURI("«modelName.decapitalize».model")))
+                                                «ENDIF»
 		                            .validateModel(isValidateModel());
 		
 		            getUriHandler().ifPresent(argumentsBuilder::uriHandler);
@@ -970,11 +969,11 @@ class RuntimeModel implements IGenerator {
 		
 		        public «modelName»Model build() {
 		            org.eclipse.emf.common.util.URI uriPhysicalOrLogical = ofNullable(uri)
-		                    .orElseGet(() -> org.eclipse.emf.common.util.URI.createURI(
+		                    .orElseGet(() ->
 		                          «IF config.resolveModelName.blank»
-		                              name + "-«modelName.decapitalize».model"));
+		                              createURI(name + "-«modelName.decapitalize».model"));
 		                          «ELSE»
-		                              String.valueOf(System.currentTimeMillis()) + "-«modelName.decapitalize».model"));
+		                              createURI("«modelName.decapitalize».model"));
 		                          «ENDIF»
 		
 		
