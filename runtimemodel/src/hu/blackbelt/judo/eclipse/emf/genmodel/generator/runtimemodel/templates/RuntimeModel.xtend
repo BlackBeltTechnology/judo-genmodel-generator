@@ -12,7 +12,7 @@ class RuntimeModel implements IGenerator {
 	@Inject RuntimeModelGeneratorConfig config
 
 	override doGenerate(Resource input, IFileSystemAccess fsa) {		
-		input.allContents.filter(GenModel).forEach[
+		input.allContents.filter(GenModel).filter[e | config.genModelNames.size == 0 || config.genModelNames.contains(e.modelName)].forEach[
 			val content = generate
 			fsa.generateFile(packagePath + "/runtime/" + modelName + "Model.java", content)
 		]
