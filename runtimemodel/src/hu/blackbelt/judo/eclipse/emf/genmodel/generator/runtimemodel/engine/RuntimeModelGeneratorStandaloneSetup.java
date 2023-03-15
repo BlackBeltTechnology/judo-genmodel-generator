@@ -1,13 +1,10 @@
 package hu.blackbelt.judo.eclipse.emf.genmodel.generator.runtimemodel.engine;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Module;
-
 /*-
  * #%L
  * hu.blackbelt.judo.eclipse.emf.genmodel.generator.runtimemodel
  * %%
- * Copyright (C) 2018 - 2022 BlackBelt Technology
+ * Copyright (C) 2018 - 2023 BlackBelt Technology
  * %%
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -22,7 +19,11 @@ import com.google.inject.Module;
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  * #L%
  */
+import com.google.inject.AbstractModule;
 
+
+
+import com.google.inject.Module;
 import hu.blackbelt.eclipse.emf.genmodel.generator.core.engine.AbstractGenModelGeneratorModule;
 import hu.blackbelt.eclipse.emf.genmodel.generator.core.engine.AbstractGenModelGeneratorStandaloneSetup;
 import hu.blackbelt.eclipse.emf.genmodel.generator.core.engine.GeneratorConfig;
