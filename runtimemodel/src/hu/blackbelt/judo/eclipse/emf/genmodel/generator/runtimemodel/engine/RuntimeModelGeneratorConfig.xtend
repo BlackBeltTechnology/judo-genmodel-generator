@@ -7,7 +7,7 @@ import java.util.List
 
 @Accessors
 class RuntimeModelGeneratorConfig extends GeneratorConfig {
-	String resolveModelName = "";
-	String resolveModelVersion = "";
-	List<String> genModelNames = new ArrayList();
+    String resolveModelName = "";
+    String resolveModelVersion = "";
+    List<String> genModelNames = new ArrayList();
 }
