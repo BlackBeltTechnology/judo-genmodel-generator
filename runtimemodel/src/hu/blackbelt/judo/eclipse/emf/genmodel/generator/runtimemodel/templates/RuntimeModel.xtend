@@ -1,17 +1,16 @@
 package hu.blackbelt.judo.eclipse.emf.genmodel.generator.runtimemodel.templates;
 
-import javax.inject.Inject
+import com.google.inject.Inject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
-import org.eclipse.xtext.generator.IGenerator
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel
 import hu.blackbelt.judo.eclipse.emf.genmodel.generator.runtimemodel.engine.RuntimeModelGeneratorConfig
 
-class RuntimeModel implements IGenerator {
+class RuntimeModel {
     @Inject extension Naming
     @Inject RuntimeModelGeneratorConfig config
 
-    override doGenerate(Resource input, IFileSystemAccess fsa) {
+    def doGenerate(Resource input, IFileSystemAccess fsa) {
         input.allContents.filter(GenModel).filter[e | config.genModelNames.size == 0 || config.genModelNames.contains(e.modelName)].forEach[
             val content = generate
             fsa.generateFile(packagePath + "/runtime/" + modelName + "Model.java", content)

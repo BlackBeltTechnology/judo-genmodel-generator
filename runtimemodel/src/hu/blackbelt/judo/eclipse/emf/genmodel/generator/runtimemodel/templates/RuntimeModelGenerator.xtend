@@ -1,15 +1,22 @@
 package hu.blackbelt.judo.eclipse.emf.genmodel.generator.runtimemodel.templates;
 
-import javax.inject.Inject
+import com.google.inject.Inject
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.generator.IFileSystemAccess
-import org.eclipse.xtext.generator.IGenerator
+import org.eclipse.xtext.generator.IGenerator2
+import org.eclipse.xtext.generator.IFileSystemAccess2
+import org.eclipse.xtext.generator.IGeneratorContext
 
-class RuntimeModelGenerator implements IGenerator {
+class RuntimeModelGenerator implements IGenerator2 {
     @Inject RuntimeModel runtimeModel
     // add more templates here
-
-    override doGenerate(Resource input, IFileSystemAccess fsa) {
+				
+	override afterGenerate(Resource input, IFileSystemAccess2 fsa, IGeneratorContext context) {
+	}
+	
+	override beforeGenerate(Resource input, IFileSystemAccess2 fsa, IGeneratorContext context) {
+	}
+	
+	override doGenerate(Resource input, IFileSystemAccess2 fsa, IGeneratorContext context) {
         runtimeModel.doGenerate(input,fsa)
-    }
+	}
 }
