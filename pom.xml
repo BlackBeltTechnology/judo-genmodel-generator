@@ -33,7 +33,7 @@
         <maven>3.9.4</maven>
         <project-shortname>judo-genmodel-generator</project-shortname>
         <project-repositoryId>BlackBeltTechnology/judo-genmodel-generator</project-repositoryId>
-        <tycho-version>4.0.7</tycho-version>
+        <tycho-version>4.0.9</tycho-version>
         <build.qualifier>'v'yyyyMMddHHmm</build.qualifier>
         <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.source>17</maven.compiler.source>
@@ -49,8 +49,8 @@
         <!--suppress UnresolvedMavenProperty -->
         <logback-test-config>${maven.multiModuleProjectDirectory}/logback-test.xml</logback-test-config>
 
-        <surefire-version>3.0.0-M7</surefire-version>
-        <pax-exam-version>4.13.4</pax-exam-version>
+        <surefire-version>3.5.1</surefire-version>
+        <pax-exam-version>4.13.5</pax-exam-version>
 
         <!-- Code Quality-->
         <sonar-maven-plugin-version>3.9.1.2184</sonar-maven-plugin-version>
@@ -58,7 +58,7 @@
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.language>java</sonar.language>
         <sonar.java.source>${java.version}</sonar.java.source>
-        <jacoco.version>0.8.8</jacoco.version>
+        <jacoco.version>0.8.12</jacoco.version>
     </properties>
 
     <licenses>
@@ -88,7 +88,7 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.4.11</version>
+                <version>${logback-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
