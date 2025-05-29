@@ -43,7 +43,7 @@
         <!-- Xtend / Xcore -->
         <xtext-version>2.39.0</xtext-version>
 
-        <emf-genmodel-generator-version>1.1.1.20241127_145607_0fc2fbf1_develop</emf-genmodel-generator-version>
+        <emf-genmodel-generator-version>1.1.1-SNAPSHOT</emf-genmodel-generator-version>
 
 
         <!--suppress UnresolvedMavenProperty -->
@@ -74,6 +74,12 @@
         <repository>
             <id>emf-genmodel-generator</id>
             <url>mvn:hu.blackbelt.eclipse:hu.blackbelt.eclipse.emf.genmodel.generator.site:${emf-genmodel-generator-version}:zip</url>
+            <layout>p2</layout>
+        </repository>
+
+        <repository>
+            <id>eclipse-xtext</id>
+            <url>https://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.39.0</url>
             <layout>p2</layout>
         </repository>
     </repositories>
