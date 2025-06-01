@@ -43,7 +43,7 @@
         <!-- Xtend / Xcore -->
         <xtext-version>2.39.0</xtext-version>
 
-        <emf-genmodel-generator-version>1.1.1-SNAPSHOT</emf-genmodel-generator-version>
+        <emf-genmodel-generator-version>1.1.1.20250601_200006_4860bd0d_feature_JNG_6310_UpdateEpsilon</emf-genmodel-generator-version>
 
 
         <!--suppress UnresolvedMavenProperty -->
