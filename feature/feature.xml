@@ -295,10 +295,8 @@
    </license>
 
    <requires>
-      <import plugin="org.eclipse.xpand" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtend" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.xtend.core" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.emf.mwe.utils" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtend.typesystem.emf" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.emf" version="2.5.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.emf.codegen.ecore" version="2.5.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.emf.ecore" version="2.5.0" match="greaterOrEqual"/>
