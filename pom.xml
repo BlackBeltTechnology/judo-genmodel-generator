@@ -43,7 +43,7 @@
         <!-- Xtend / Xcore -->
         <xtext-version>2.39.0</xtext-version>
 
-        <emf-genmodel-generator-version>1.1.1.20250601_200006_4860bd0d_feature_JNG_6310_UpdateEpsilon</emf-genmodel-generator-version>
+        <emf-genmodel-generator-version>1.1.1.20250604_004501_3882b914_feature_JNG_6310_UpdateEpsilon</emf-genmodel-generator-version>
 
 
         <!--suppress UnresolvedMavenProperty -->
@@ -534,7 +534,7 @@
                     <plugin>
                         <groupId>org.simplify4u.plugins</groupId>
                         <artifactId>sign-maven-plugin</artifactId>
-                        <version>1.0.1</version>
+                        <version>1.1.0</version>
                         <executions>
                             <execution>
                                 <goals>
