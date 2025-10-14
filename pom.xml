@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>hu.blackbelt.judo</groupId>
@@ -69,21 +70,28 @@
             <url>https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt</url>
         </license>
     </licenses>
-
     <repositories>
         <repository>
             <id>emf-genmodel-generator</id>
             <url>mvn:hu.blackbelt.eclipse:hu.blackbelt.eclipse.emf.genmodel.generator.site:${emf-genmodel-generator-version}:zip</url>
             <layout>p2</layout>
         </repository>
-
         <repository>
             <id>eclipse-xtext</id>
             <url>https://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.39.0</url>
             <layout>p2</layout>
         </repository>
+        <repository>
+            <id>judong</id>
+            <url>https://repository.judo.technology/repository/maven-judong/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
     </repositories>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -227,8 +235,7 @@
                     <flattenMode>resolveCiFriendliesOnly</flattenMode>
                     <pomElements>
                         <dependencies>flatten</dependencies>
-                        <repositories>flatten</repositories>
-                    </pomElements>
+                        <repositories>flatten</repositories></pomElements>
                 </configuration>
                 <executions>
                     <execution>
@@ -456,7 +463,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -475,7 +482,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -494,7 +501,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
@@ -565,14 +572,14 @@
             <id>release-judong</id>
             <distributionManagement>
                 <snapshotRepository>
-                    <id>judong-nexus-distribution</id>
+                    <id>judong-distribution</id>
                     <!--suppress UnresolvedMavenProperty -->
-                    <url>https://nexus.judo.technology/repository/maven-judong-snapshots/</url>
+                    <url>https://repository.judo.technology/repository/maven-judong-upstream/</url>
                 </snapshotRepository>
                 <repository>
-                    <id>judong-nexus-distribution</id>
+                    <id>judong-distribution</id>
                     <!--suppress UnresolvedMavenProperty -->
-                    <url>https://nexus.judo.technology/repository/maven-judong-snapshots/</url>
+                    <url>https://repository.judo.technology/repository/maven-judong-upstream/</url>
                 </repository>
             </distributionManagement>
         </profile>
@@ -681,7 +688,7 @@
                                         <toc>left</toc>
                                         <icons>font</icons>
                                         <sectanchors>true</sectanchors>
-                                        <idprefix />
+                                        <idprefix/>
                                         <idseparator>-</idseparator>
                                     </attributes>
                                 </configuration>
