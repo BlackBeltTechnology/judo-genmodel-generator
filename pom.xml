@@ -43,7 +43,7 @@
         <!-- Xtend / Xcore -->
         <xtext-version>2.39.0</xtext-version>
 
-        <emf-genmodel-generator-version>1.1.1.20251204_101025_23b31120_develop</emf-genmodel-generator-version>
+        <emf-genmodel-generator-version>1.1.1.20251205_144303_04125fa3_develop</emf-genmodel-generator-version>
 
 
         <!--suppress UnresolvedMavenProperty -->
