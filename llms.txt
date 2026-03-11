@@ -1,0 +1,33 @@
+# JUDO GenModel Generator
+
+> An Eclipse plugin that generates JUDO runtime helper classes for EMF GenModels — producing type-safe Java wrapper classes with fluent builder APIs, load/save operations, and validation support.
+
+Key facts:
+- Java 21 (compiler targets Java 11 bytecode via Tycho)
+- Maven 3.9.4 with Tycho 4.0.13 (Eclipse PDE build) and Xtext/Xtend 2.39.0
+- 3 modules: core plugin, Eclipse Feature, P2 Update Site
+- Uses Xtend templates, MWE2 workflow orchestration, and Guice dependency injection
+- Part of the JUDO NG platform by BlackBelt Technology
+- License: Eclipse Public License 2.0 (EPL-2.0)
+
+## Docs
+
+- [README.md](README.md): Project overview, architecture diagrams, and build commands
+- [AGENTS.md](AGENTS.md): Developer guide with directory structure, build commands, and coding conventions
+- [CONTRIBUTING.md](CONTRIBUTING.md): Development setup, submission process, and contribution guidelines
+
+## Modules — Generator Plugin
+
+- [runtimemodel/pom.xml](runtimemodel/pom.xml): Core OSGi bundle containing the code generation engine — MWE2 workflow, Guice DI module, Xtend templates, and naming utilities
+
+## Modules — Distribution
+
+- [feature/feature.xml](feature/feature.xml): Eclipse Feature that packages the runtimemodel plugin for installation
+- [site/category.xml](site/category.xml): P2 Update Site aggregating features into a deployable repository
+
+## Optional
+
+- [.github/CIFLOW.md](.github/CIFLOW.md): CI/CD pipeline and GitFlow branching strategy
+- [.github/workflows/build.yml](.github/workflows/build.yml): GitHub Actions build workflow
+- [LICENSE.txt](LICENSE.txt): Eclipse Public License 2.0 full text
+- [pom.xml](pom.xml): Parent POM with all dependency versions, plugin configurations, and profiles
